@@ -37,7 +37,7 @@ Arguments are similar to igraph.plot:
 ### Blender
 
 - The script creates two collections for convenience - nodes and edges. If these collections already exist they will not be created again
--The script then checks for all the colours used in the network and creates materials for them. If these materials already exist they will not be created again
--Nodes and edges will be created, each with a unique name. Once again, if these objects already exist they will not be created again.
--As mentioned above, nodes can either be primitive spheres, cubes, circles or planes. Using a custom object is easy, just set the vertex.shape in R as the name of that object in Blender. If the object doesn't have materials, it'll be given the colour assigned in R, otherwise the existing materials are kept.
--If you run the script multiple times, make sure you purge orphaned data regularly as the curves used to generate edges will still be in the blender file otherwise, even if new edges have been generated.
+- The script then checks for all the colours used in the network and creates materials for them. If these materials already exist they will not be created again
+- Nodes and edges will be created, each with a unique name. Once again, if these objects already exist they will not be created again.
+- As mentioned above, nodes can either be primitive spheres, cubes, circles or planes. Using a custom object is easy, just set the vertex.shape in R as the name of that object in Blender. If the object doesn't have materials, it'll be given the colour assigned in R, otherwise the existing materials are kept.
+- If you run the script multiple times, make sure you purge orphaned data regularly as the curves used to generate edges will still be in the blender file otherwise, even if new edges have been generated.
