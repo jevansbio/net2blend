@@ -1,5 +1,5 @@
 net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape="sphere",
-	vertex.size=0.2,edge.size=1,edge.3d=T,edge.curve=0,vertex.intersect=T,edge.shorten=0,
+	vertex.size=0.2,edge.size=1,edge.3d=T,edge.curve=0,vertex.intersect=T,vertex.edgeshorten=0,
 	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,outputdir=NA,netname=""){
 	#######
 	#Exports files to plot an igraph object in blender. Arguments are similar to igraph.plot
@@ -30,7 +30,7 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 		edge.arrowlength=0.2
 	}
 
-	if((!edge.intersect&vertex.edgeshorten==0)|edge.arrows){
+	if((!vertex.intersect&vertex.edgeshorten==0)|edge.arrows){
 		vertex.edgeshorten=vertex.size-0.05
 	}
 	
