@@ -1,6 +1,6 @@
 net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape="sphere",
 	vertex.size=0.2,edge.size=1,edge.3d=T,edge.curve=0,vertex.intersect=T,vertex.edgeshorten=0,
-	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,outputdir=NA,netname=""){
+	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,edge.dash=0,outputdir=NA,netname="",maxlength=NA){
 	#######
 	#Exports files to plot an igraph object in blender. Arguments are similar to igraph.plot
 	#net = Igraph network object
@@ -17,16 +17,17 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	#edge.arrows= Boolean. If TRUE, plot arrowheads at the end of edges
 	#edge.arrowsize = Thickness of arrows. If edge.arrows is TRUE and no value is provided, is based on edge.size
 	#edge.arrowlength = Length of arrows. If edge.arrows is TRUE and no value is provided, this defaults to 0.2
+	#edge.dash = Size of dashed edges. Larger values result in a greater number of short dashes.
 	#outputdir = File path for export
 	#netname = name to append to files
 	#######
 	if(is.na(outputdir)){
 		outputdir=getwd()
 	}
-	if(edge.arrows&edge.arrowsize==0){
+	if(all(edge.arrows)&all(edge.arrowsize==0)){
 		edge.arrowsize=edge.size+0.05
 	}
-	if(edge.arrows&edge.arrowlength==0){
+	if(all(edge.arrows)&all(edge.arrowlength==0)){
 		edge.arrowlength=0.2
 	}
 
@@ -54,7 +55,9 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 		#if only one curve value is supplied, scale by edge length
 		edata=as_long_data_frame(net)
 		lengths=sqrt((edata$to_x-edata$from_x)^2+(edata$to_y-edata$from_y)^2+(edata$to_z-edata$from_z)^2)
-		maxlength=max(lengths)
+		if(is.na(maxlength)){
+			maxlength=max(lengths)
+		}
 		edge.curve=edge.curve*(lengths/maxlength)
 	}
 
@@ -63,6 +66,7 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 
 	V(net)$shape=vertex.shape
 	V(net)$size=vertex.size
+	V(net)$size[V(net)$shape=="square"]=V(net)$size[V(net)$shape=="square"]*2
 	V(net)$shorten=vertex.edgeshorten
 
 
@@ -71,8 +75,16 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	E(net)$is3d=edge.3d
 	E(net)$arrowsize=edge.arrowsize
 	E(net)$arrowlength=edge.arrowlength
+	E(net)$dash=edge.dash
 
 	edata=as_long_data_frame(net)
+	if(any(!edata$is3d)){
+		highz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-0.01
+		lowz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-0.1
+	
+		edata$to_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))
+		edata$from_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))
+	}
 	vdata=as_data_frame(net,what = 'vertices')
 	edata=data.frame(edata,t(col2rgb(edata$colour)/255))
 	vdata=data.frame(vdata,t(col2rgb(vdata$colour)/255))
@@ -82,5 +94,18 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 
 }
 
+findmaxlength=function(net,layout){
 
+	colnames(layout)=c("x","y","z")[1:ncol(layout)]
+	layout=as.data.frame(layout)
+	if(!"z" %in% names(layout)){
+		layout$z=0
+	}
+	V(net)$x=layout$x
+	V(net)$y=layout$y
+	V(net)$z=layout$z
+	edata=as_long_data_frame(net)
+	lengths=sqrt((edata$to_x-edata$from_x)^2+(edata$to_y-edata$from_y)^2+(edata$to_z-edata$from_z)^2)
+	return(max(lengths))
+}
 
