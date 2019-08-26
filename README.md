@@ -18,7 +18,7 @@ NOTE: Built under Blender 2.8
 - Edge and node collections now named based on the filename for easier organisation.
 - Flat square node size multiplied by 2 for better parity with circular nodes.
 - 2d edges offset slightly below nodes to avoid clipping.
-- 2d edges offset slightly in the order of edge plotting, as that as with igraph the last edges in the graph will be on top.
+- 2d edges offset slightly in the order of edge plotting, so that as with igraph the last edges in the graph will be on top.
 - Added a maxlength argument - can be used to control the amount of curve which is usually based on the longest edge on the network. This could lead to networks with fewer or more edges having slightly different curves to each other. The findmaxlength function can be used to obtain this value from one particular network/layout combination. This value can then be used to force other networks to use the same cuves.
 
 ## Detailed instructions:
