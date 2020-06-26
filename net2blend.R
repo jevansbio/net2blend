@@ -1,6 +1,6 @@
 net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape="sphere",
 	vertex.size=0.2,edge.size=0.1,edge.3d=T,edge.curve=0,vertex.intersect=T,vertex.edgeshorten=0,
-	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,edge.dash=0,outputdir=NA,netname="",netname2="",maxlength=NA){
+	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,edge.dash=0,directed=F,outputdir=NA,netname="",netname2="",maxlength=NA){
 	#######
 	#Exports files to plot an igraph object in blender. Arguments are similar to igraph.plot
 	#net = Igraph network object
@@ -91,8 +91,11 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	edata=data.frame(edata,t(col2rgb(edata$colour)/255))
 
 	edata$name=sapply(1:nrow(edata),function(x){
-		cnodes=c(edata$from[x],edata$to[x])
-		paste(cnodes[order(cnodes)],collapse="_")
+		cnodes=c(edata$from_name[x],edata$to_name[x])
+		if(!directed){
+			cnodes=cnodes[order(cnodes)]
+		}
+		paste(cnodes,collapse="_")
 	})
 
 	vdata=data.frame(vdata,t(col2rgb(vdata$colour)/255))
@@ -117,21 +120,41 @@ findmaxlength=function(net,layout){
 	return(max(lengths))
 }
 
-add_missing_edges=function(net,directed=F,selfloop=F,attrlist=list()){
+find_all_edges=function(allnets,directed=F){
+	alledges1=sapply(1:length(allnets),function(i){
 
-	alledges=t(combn(1:length(V(net)),2))
-	if(directed){
-		alledges=rbind(alledges,alledges[,c(2,1)])
+		allnet=allnets[[i]]
+		edges=as_edgelist(allnet)
+		
+		return(edges)
+	})
+	alledges1=do.call(rbind,alledges1)
+	if(!directed){
+		alledges1=t(sapply(1:nrow(alledges1),function(x){alledges1[x,order(alledges1[x,])]}))
+	}
+	alledges2=sapply(1:nrow(alledges1),function(x){paste(alledges1[x,],collapse="_")})
+	alledges3=alledges1[!duplicated(alledges2),]
+	return(alledges3)
+}
+
+add_missing_edges=function(net,alledges=NULL,directed=F,selfloop=F,attrlist=list()){
+	
+	if(is.null(alledges)){
+		alledges=t(combn(1:length(V(net)),2))
+		if(directed){
+			alledges=rbind(alledges,alledges[,c(2,1)])
+		}
 	}
 	alledges2=sapply(1:nrow(alledges),function(x){paste(alledges[x,],collapse="_")})
-
+	
+	
 	if(!selfloop){
 		samebool=alledges[,1]!=alledges[,2]
 		alledges=alledges[samebool,]
 		alledges2=alledges2[samebool]
 	}
 
-	curredges=as_edgelist(g)
+	curredges=as_edgelist(net)
 	curredges2=sapply(1:nrow(curredges),function(x){paste(curredges[x,],collapse="_")})
 	curredges3=sapply(1:nrow(curredges),function(x){paste(curredges[x,c(2,1)],collapse="_")})	
 	if(directed){
