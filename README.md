@@ -15,12 +15,12 @@ NOTE: Built under Blender 2.8
 
 26/06/20 - Added the following features:
 
--Networks can now be animated! Simply set the frame option to wherever you want the keyframe to be added. If the objects exist already they will be modified with the new values. Size, position and colour of edges can have keyframes associated with them in blender. This has neccesitated the changing of a few things:
--Size of nodes is now in relation to the initial size of blender primities (2m) rather than absolute units. This is to ensure consistency when modifying a nodes size.
--Unfortunatley the previous code where a material was created per colour has had to be retired. Each object now has its own material so that this material can be animated.
--There is now an additional suffix option in the R script (netname2). Blender will ignore this additional name. This means that R will export files as follows "netname_ename_netname2.csv". This allows a user to export different versions of the same network for animation.
--There is now a "directed" argument due to the new way in which the script will attempt to create consistent edge names. In the future I'll modify this to check the igraph object instead. I have not tested animations thorougly with arrows and directed networks yet.
--Added a few utility functions to aid in the setting up of networks for animations, namely to fill a network with the empty edges that might not exist in a particular version of that network, but still need a keyframe.
+- Networks can now be animated! Simply set the frame option to wherever you want the keyframe to be added. If the objects exist already they will be modified with the new values. Size, position and colour of edges can have keyframes associated with them in blender. This has neccesitated the changing of a few things:
+- Size of nodes is now in relation to the initial size of blender primities (2m) rather than absolute units. This is to ensure consistency when modifying a nodes size.
+- Unfortunatley the previous code where a material was created per colour has had to be retired. Each object now has its own material so that this material can be animated.
+- There is now an additional suffix option in the R script (netname2). Blender will ignore this additional name. This means that R will export files as follows "netname_ename_netname2.csv". This allows a user to export different versions of the same network for animation.
+- There is now a "directed" argument due to the new way in which the script will attempt to create consistent edge names. In the future I'll modify this to check the igraph object instead. I have not tested animations thorougly with arrows and directed networks yet.
+- Added a few utility functions to aid in the setting up of networks for animations, namely to fill a network with the empty edges that might not exist in a particular version of that network, but still need a keyframe.
 
 26/08/19 - Added the following features:
 
