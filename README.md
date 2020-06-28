@@ -75,6 +75,10 @@ directed=Are the edges added directional? False by default
 selfloop=Are self loops to be added (if generating all possible combinations of edges). False by default.
 attrlist=List of attributes to be added to the new edges. For example, list(weight=0) for edges not technically present in a version of a network. Empty list by default.
 
+# find_all_nodes
+Returns all nodes in a list of networks as a matrix. These can then be added to all networks for consistency while animating using add_missing_nodes
+allnets =list of Igraph network objects
+
 # add_missing_nodes
 Add nodes to the network, if they are not present already, and fill with an attribute. For example, nodes not existing in certain versions of the network nethertheless need to be present in every version while animating in blender, and are assigned a size of 0 when not technically present.
 net = Igraph network object to which nodes will be added
