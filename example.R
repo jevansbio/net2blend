@@ -5,7 +5,7 @@ library(igraph)
 source("net2blend.R")
 
 #generate a random network of 13 nodes
-g1=erdos.renyi.game(13,0.1)
+g1=erdos.renyi.game(13,0.25)
 #as this method does not give nodes names, assign them randomly from the alphabet
 V(g1)$name=sample(LETTERS,length(V(g1)))
 #give all these nodes an attribute that they were present
@@ -62,7 +62,7 @@ l2$z[!row.names(l2)%in%V(g1)[present]$name]=0.5
 net2blend(g1,layout=l1[match(V(g1)$name,row.names(l1)),],
 vertex.color="red",
 edge.color="black",
-edge.size=0.025*E(g1)$weight,#edges of weight 0 will be invisible
+edge.size=0.01*E(g1)$weight,#edges of weight 0 will be invisible
 vertex.size=0.05*V(g1)$present,#non present nodes will be invisible
 netname="example1",
 netname2=1)
@@ -80,7 +80,7 @@ nodecol[V(g2)$name%in%V(g1)[present]$name]="blue"
 net2blend(g2,layout=l2[match(V(g2)$name,row.names(l2)),],
 vertex.color=nodecol,
 edge.color=edgecol,
-edge.size=0.025*E(g2)$weight,#edges of weight 0 will be invisible
+edge.size=0.01*E(g2)$weight,#edges of weight 0 will be invisible
 vertex.size=0.05*V(g2)$present,#non present nodes will be invisible
 netname="example1",
 netname2=2)#note that netname 2 is different
