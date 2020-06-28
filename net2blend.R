@@ -18,6 +18,7 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	#edge.arrowsize = Thickness of arrows. If edge.arrows is TRUE and no value is provided, is based on edge.size
 	#edge.arrowlength = Length of arrows. If edge.arrows is TRUE and no value is provided, this defaults to 0.2
 	#edge.dash = Size of dashed edges. Larger values result in a greater number of short dashes.
+	#directed is the network directed
 	#outputdir = File path for export
 	#netname = name to append to files
 	#netname2 = second name to append to files - not used by blender
@@ -35,7 +36,6 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	if((!vertex.intersect&vertex.edgeshorten==0)|edge.arrows){
 		vertex.edgeshorten=vertex.size-0.05
 	}
-	
 	
 	colnames(layout)=c("x","y","z")[1:ncol(layout)]
 	layout=as.data.frame(layout)
@@ -78,6 +78,8 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	E(net)$arrowlength=edge.arrowlength
 	E(net)$dash=edge.dash
 	
+	#It is important to permute the nodes to the same order, otherwise the from and to of edges can change, leading to your edges flipping
+	net=permute(net,match(V(net)$name,sort(V(net)$name)))
 
 	edata=as_long_data_frame(net)
 	if(any(!edata$is3d)){
@@ -168,6 +170,12 @@ add_missing_edges=function(net,alledges=NULL,directed=F,selfloop=F,attrlist=list
 	return(net2)
 }
 
+find_all_nodes=function(allnets){
+	unique(unlist(sapply(allnets,function(x){
+		V(x)$name
+	})))
+}
+
 add_missing_nodes=function(net,allnodes,attrlist=list()){
 	if(!"name"%in%attrlist){
 		attrlist$name=allnodes[!allnodes%in%V(net)$name]
@@ -175,6 +183,17 @@ add_missing_nodes=function(net,allnodes,attrlist=list()){
 
 	net2=add_vertices(net,length(allnodes[!allnodes%in%V(net)$name]),attr=attrlist)
 
-	return(net)
+	return(net2)
+}
+
+get_edge_names=function(net,directed=F){
+
+	edges=as_edgelist(net)
+		
+	if(!directed){
+		edges=t(sapply(1:nrow(edges),function(x){edges[x,order(edges[x,])]}))
+	}
+	edges=sapply(1:nrow(edges),function(x){paste(edges[x,],collapse="_")})
+	return(edges)
 }
 

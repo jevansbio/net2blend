@@ -548,7 +548,7 @@ class NetImport(bpy.types.Operator):
         #add nodes
         if (vnames+'nodes') not in bpy.data.collections:
             nodes = bpy.data.collections.new((vnames+'nodes'))
-            #bpy.context.scene.collection.children.link(nodes)
+            bpy.context.scene.collection.children.link(nodes)
         else:
             nodes=bpy.data.collections[(vnames+'nodes')]
             
@@ -611,7 +611,7 @@ class NetImport(bpy.types.Operator):
 
         if (enames+'edges') not in bpy.data.collections:
             edges = bpy.data.collections.new((enames+'edges'))
-            #bpy.context.scene.collection.children.link(edges)
+            bpy.context.scene.collection.children.link(edges)
         else:
             edges=bpy.data.collections[(enames+'edges')]
             
