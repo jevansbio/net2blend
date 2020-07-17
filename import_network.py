@@ -36,16 +36,16 @@ class NetProps(PropertyGroup):
   
 
     edatapath: StringProperty(
-        name="Edge data path",
-        description=":Edge CSV",
+        name="",
+        description=":Edge CSV path",
         default="",
         maxlen=1024,
         subtype="FILE_PATH"
         )
         
     vdatapath: StringProperty(
-        name="Vertex data path",
-        description=":Vertex CSV",
+        name="",
+        description=":Vertex CSV path",
         default="",
         maxlen=1024,
         subtype="FILE_PATH",
@@ -58,13 +58,13 @@ class NetProps(PropertyGroup):
         )
         
     frameint: IntProperty(
-        name="Frame interval",
+        name="Frames",
         description=":Gap between network timesteps",
         default=24,
         )
         
     folderpath: StringProperty(
-        name="Folder path",
+        name="",
         description=":Folder of networks",
         default="",
         maxlen=1024,
@@ -725,14 +725,18 @@ class NetImportPanel(Panel):
         layout = self.layout
         scene = context.scene
         netimp = scene.netimport
-
+        
+        layout.label(text="Edge data path:")
         layout.prop(netimp, "edatapath")
+        layout.label(text="Vertex data path:")
         layout.prop(netimp, "vdatapath")
         layout.prop(netimp, "cframe")
         layout.separator()
         layout.operator( "object.network")
         layout.separator()
+        layout.label(text="Import folder path:")
         layout.prop(netimp, "folderpath")
+        layout.label(text="Interval between networks:")
         layout.prop(netimp, "frameint")
         layout.operator( "object.networkfolder")
 
