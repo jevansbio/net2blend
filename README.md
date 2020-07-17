@@ -9,9 +9,22 @@ NOTE: Built under Blender 2.8
 
 - place the import_net.py file in your blender addon folder. Install using the addons menu - it'll be under the name "Import network". This will add an "import network" panel under the "tools" category in the sidebar.
 
-- Run the R function using an igraph object and other parameters as detailed below - this will export and edge csv and a vertex csv. Then just select these files in the Blender panel and click "import network". Your network objects should appear (depending on the coordinates it might not be in view). 
+- Run the R function using an igraph object and other parameters as detailed below - this will export and edge csv and a vertex csv. 
+
+-Then just select these files in the Blender panel and click "import network". Your network objects should appear (depending on the coordinates it might not be in view). 
+
+-Alternatively you can point blender to a folder of networks
 
 ## Changelog:
+
+17/07/20 - Added the following features:
+- Changed the position of interface in Blender. Import network now has its own tab instead of being hidden in "tools".
+- Added the ability to import entire folders of networks at set frame intervals.
+- Added ability to animate line dashes. Still only visible in cycles renderer unfortunatley.
+- Added ability to animate whether an edge is curved or not
+- Completely changed how dashed edges work. Previously the material would completely break when an edge was at a certain angle.
+- Exposed arguments for how much to offset 2d edges.
+- Quite a few bugfixes.
 
 26/06/20 - Added the following features:
 
@@ -46,13 +59,17 @@ Arguments are similar to igraph.plot:
 - vertex.size = Size of vertex. Default is 0.2
 - edge.size = Edge size. Default is 0.1.
 - edge.3d = Edges is a 3d object. If FALSE will flatten this edge. Default is 3d.
-- edge.curve = Amount to curve edges. If a single value, this will be scaled by the length of the edges in the plot. Default is 0
+- edge.curve = Boolean:Should an edge be curved (defaults to 0.2) or numeric: Amount to curve edges. If a single value, this will be scaled by the length of the edges in the plot. Default is 0.
+- edge.forcecurve= Boolean. If TRUE an edge will be set up so as to be curved in blender, even if edge.curve=0.
 - vertex.intersect = Boolean. If TRUE edges will meet in the center of the vertex. If FALSE edges will be shortened by size of vertex. Default is TRUE
 - vertex.edgeshorten = If provided, edges will be shortened by this value instead of the size of the vertex. Default is 0.
 - edge.arrows= Boolean. If TRUE, plot arrowheads at the end of edges. Default is FALSE
 - edge.arrowsize = Thickness of arrows. If edge.arrows is TRUE and no value is provided, is based on edge.size
 - edge.arrowlength = Length of arrows. If edge.arrows is TRUE and no value is provided, this defaults to 0.2
 - edge.dash = Size of dashed edges. Larger values result in a greater number of short dashes. Defaults to 0, no dash.
+- edge.isdashed = Boolean. Should an edge be set up to be dashed even if the value of edge.dash is 0.
+- zoffset1 = minimum amount to offset 2d edges below z coordinate to avoid clipping. Defaults to 0.01.
+- zoffset2 = maximum amount to offset 2d edges below z coordinate to avoid clipping. Defaults to 0.05.
 - directed = Boolean. Should be true for a directed network. In future this should be obtained from the net argument.
 - outputdir = File path for export. Default is working directory
 - netname = name to append as prefix to files. Format is netname_edata_netname2.csv or netname_vdata_netname2.csv
@@ -88,8 +105,8 @@ Add nodes to the network, if they are not present already, and fill with an attr
 
 
 ### Blender
-
+- You can either import networks one at a time or by folder.
 - The script creates two collections for convenience - nodes and edges, named based on the filenames If these collections already exist they will not be created again. 
-- Nodes and edges will be created, each with a unique name. If these objects already exist in that collection they will be replaced (if the frame is the same) or have a keyframe added (if the frame is different).
+- Nodes and edges will be created, each with a unique name. If these objects already exist in that collection they will be changed or have a keyframe added.
 - As mentioned above, nodes can either be primitive spheres, cubes, circles or planes. Using a custom object is easy, just set the vertex.shape in R as the name of that object in Blender. If the object doesn't have materials, it'll be given the colour assigned in R, otherwise the existing materials are kept.
 - If you run the script multiple times, make sure you purge orphaned data regularly as the curves used to generate edges will still be in the blender file otherwise, even if new edges have been generated.
