@@ -2,9 +2,9 @@ bl_info = {
     "name": "Network to blender",
     "description": "Script to plot networks in Blender",
     "author": "Julian Evans",
-    "version": (0, 0, 5),
+    "version": (0, 0, 6),
     "blender": (2, 80, 0),
-    "location": "3D View > Tools",
+    "location": "3D View",
     "warning": "", # used for warning icon and text in addons panel
     "wiki_url": "",
     "tracker_url": "",
@@ -15,6 +15,7 @@ bl_info = {
 import bpy
 from mathutils import Vector
 import csv
+import os
 
 from bpy.props import (StringProperty,
                        PointerProperty,
@@ -55,31 +56,45 @@ class NetProps(PropertyGroup):
         description=":Frame number",
         default=0,
         )
-
-   
-
-# ------------------------------------------------------------------------
-#    Operators
-# ------------------------------------------------------------------------
-
-class NetImport(bpy.types.Operator):
-    """Import network to blender"""      # Use this as a tooltip for menu items and buttons.
-    bl_idname = "object.network"        # Unique identifier for buttons and menu items to reference.
-    bl_label = "Import network"         # Display name in the interface.
-    bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
-
-
-    
-    def execute(self, context):        # execute() is called when running the operator.
-        scene = context.scene
-        netimp = scene.netimport
-        edatapath=netimp.edatapath
-        vdatapath=netimp.vdatapath
-        cframe=netimp.cframe
-        bpy.context.scene.frame_set(cframe)
         
-        def add_arrowhead(v0, v1, ered,egreen,eblue,edgename='edge',toshorten=0,fromshorten=0,arrowlength=0,arrowsize=0,ecurve=0,edge3d=True):
-            curved=ecurve>0
+    frameint: IntProperty(
+        name="Frame interval",
+        description=":Gap between network timesteps",
+        default=24,
+        )
+        
+    folderpath: StringProperty(
+        name="Folder path",
+        description=":Folder of networks",
+        default="",
+        maxlen=1024,
+        subtype="FILE_PATH",
+        )
+# ------------------------------------------------------------------------
+#    Functions
+# ------------------------------------------------------------------------
+
+
+
+class importnet():
+    
+    def __init__(self,context,edatapath,vdatapath,cframe):
+        self.context=context
+        self.edatapath=edatapath
+        self.vdatapath=vdatapath
+        self.cframe=cframe
+        
+
+        
+    def do_import(self):
+        context=self.context
+        scene=context.scene
+        edatapath=self.edatapath
+        vdatapath=self.vdatapath
+        cframe=self.cframe
+        
+        def add_arrowhead(v0, v1, ered,egreen,eblue,edgename='edge',toshorten=0,fromshorten=0,arrowlength=0,arrowsize=0,ecurve=0,forcecurve=False,edge3d=True):
+            curved=(ecurve>0)|forcecurve
             v0, v1 = Vector(v0), Vector(v1)  
             #backup original coords
             v02=v0
@@ -90,7 +105,7 @@ class NetImport(bpy.types.Operator):
             vec1.normalize()
             v0=v0+(vec1*fromshorten)
             v1=v0+(vec1*((v1-v0).length-toshorten))
-    
+
             o = (v1 + v0) / 2  
             if curved:
                 vsize=[abs(i) for i in list(v1-v0)]
@@ -127,8 +142,8 @@ class NetImport(bpy.types.Operator):
             bpy.context.object.keyframe_insert(data_path="rotation", frame=cframe)
             edges.objects.link(bpy.context.object)
             
-        def move_arrowhead(v0, v1, ered,egreen,eblue,edgename='edge',toshorten=0,fromshorten=0,arrowlength=0,arrowsize=0,ecurve=0,edge3d=True):
-            curved=ecurve>0
+        def move_arrowhead(v0, v1, ered,egreen,eblue,edgename='edge',toshorten=0,fromshorten=0,arrowlength=0,arrowsize=0,ecurve=0,forcecurve=False,edge3d=True):
+            curved=(ecurve>0)|forcecurve
             v0, v1 = Vector(v0), Vector(v1)  
             #backup original coords
             v02=v0
@@ -139,7 +154,7 @@ class NetImport(bpy.types.Operator):
             vec1.normalize()
             v0=v0+(vec1*fromshorten)
             v1=v0+(vec1*((v1-v0).length-toshorten))
-    
+
             o = (v1 + v0) / 2  
             if curved:
                 vsize=[abs(i) for i in list(v1-v0)]
@@ -169,8 +184,8 @@ class NetImport(bpy.types.Operator):
             old_obj.keyframe_insert(data_path="scale", frame=cframe)
             old_obj.keyframe_insert(data_path="rotation", frame=cframe)
             
-        def add_bezier(v0 , v1,edgename='edge',ecurve=0,toshorten=0,fromshorten=0,arrowlength=0):
-            curved=ecurve>0
+        def add_bezier(v0 , v1,edgename='edge',ecurve=0,forcecurve=False,toshorten=0,fromshorten=0,arrowlength=0):
+            curved=(ecurve>0)|forcecurve
             v0, v1 = Vector(v0), Vector(v1)  
             #backup original coords
             v02=v0
@@ -185,16 +200,19 @@ class NetImport(bpy.types.Operator):
             
             o = (v1 + v0) / 2  
             if curved:
-                vsize=[abs(i) for i in list(v1-v0)]
-                res = len(vsize) - 1 - vsize[::-1].index(min(vsize))        
-                curvev=[0,0,0]
-                curvev[res]=1
-                curvev=Vector(curvev)        
-                
-                dir = v1-v0
-                dir2 = dir.cross(curvev)
-                dir2.normalize()
-                v2=o+(dir2*ecurve )
+                if ecurve>0:
+                    vsize=[abs(i) for i in list(v1-v0)]
+                    res = len(vsize) - 1 - vsize[::-1].index(min(vsize))        
+                    curvev=[0,0,0]
+                    curvev[res]=1
+                    curvev=Vector(curvev)        
+                    
+                    dir = v1-v0
+                    dir2 = dir.cross(curvev)
+                    dir2.normalize()
+                    v2=o+(dir2*ecurve )
+                else:
+                    v2=o
             curve = bpy.data.curves.new(edgename, 'CURVE')
             spline = curve.splines.new('BEZIER')
             bp0 = spline.bezier_points[0]
@@ -205,7 +223,9 @@ class NetImport(bpy.types.Operator):
             if curved:
                 spline.bezier_points.add(count=1)
                 bp2 = spline.bezier_points[1]
+
                 bp2.co = v2 - o
+
                 bp2.handle_left_type = bp2.handle_right_type = 'AUTO'
 
                 
@@ -237,14 +257,16 @@ class NetImport(bpy.types.Operator):
             bp1.keyframe_insert(data_path="handle_left_type", frame=cframe)
             
             ob = bpy.data.objects.new(edgename, curve)
+            ob.data.use_uv_as_generated = True
+
             ob.matrix_world.translation = o
             ob.keyframe_insert(data_path="scale", frame=cframe)
             ob.keyframe_insert(data_path="location", frame=cframe)
             ob.keyframe_insert(data_path="rotation_euler", frame=cframe)
             return ob
 
-        def modify_bezier(v0,v1,edgename='edge',ecurve=0,toshorten=0,fromshorten=0,arrowlength=0):
-            curved=ecurve>0
+        def modify_bezier(v0,v1,edgename='edge',ecurve=0,forcecurve=False,toshorten=0,fromshorten=0,arrowlength=0):
+            curved=(ecurve>0)|forcecurve
             v0, v1 = Vector(v0), Vector(v1)  
             #backup original coords
             v02=v0
@@ -258,17 +280,19 @@ class NetImport(bpy.types.Operator):
 
             o = (v1 + v0) / 2  
             if curved:
-                vsize=[abs(i) for i in list(v1-v0)]
-                res = len(vsize) - 1 - vsize[::-1].index(min(vsize))        
-                curvev=[0,0,0]
-                curvev[res]=1
-                curvev=Vector(curvev)        
-                
-                dir = v1-v0
-                dir2 = dir.cross(curvev)
-                dir2.normalize()
-                v2=o+(dir2*ecurve )
-
+                if ecurve>0:
+                    vsize=[abs(i) for i in list(v1-v0)]
+                    res = len(vsize) - 1 - vsize[::-1].index(min(vsize))        
+                    curvev=[0,0,0]
+                    curvev[res]=1
+                    curvev=Vector(curvev)        
+                    
+                    dir = v1-v0
+                    dir2 = dir.cross(curvev)
+                    dir2.normalize()
+                    v2=o+(dir2*ecurve )
+                else:
+                    v2=o
             old_obj=edges.objects[ename]
             bp0 = old_obj.data.splines.active.bezier_points.values()[0]
             bp0.co = v0 - o
@@ -277,7 +301,9 @@ class NetImport(bpy.types.Operator):
 
             if curved:
                 bp2 = old_obj.data.splines.active.bezier_points.values()[1]
+
                 bp2.co = v2 - o
+
                 bp2.handle_left_type = bp2.handle_right_type = 'AUTO'
                 
 
@@ -295,6 +321,7 @@ class NetImport(bpy.types.Operator):
             bp0.keyframe_insert(data_path="handle_left_type", frame=cframe)
             
             if curved:
+                print("Add curve keyframe")
                 bp2 = old_obj.data.splines.active.bezier_points.values()[1]
                 bp2.keyframe_insert(data_path="co", frame=cframe)
                 bp2.keyframe_insert(data_path="handle_right", frame=cframe)
@@ -315,10 +342,12 @@ class NetImport(bpy.types.Operator):
             old_obj.keyframe_insert(data_path="rotation_euler", frame=cframe)
             return old_obj
 
-        def make_material(name,cr,cg,cb,dashe=0):
+        def make_material(name,cr,cg,cb,cd=0,forcedash=False):
             i=(name+"_mat")
-            dash=dashe>0
+            dash=(cd>0)|forcedash
+            print('material '+i)
             if i not in bpy.data.materials:
+                print('created')
                 if not dash:
                     mat = bpy.data.materials.new(name=i)
                     mat.diffuse_color = (float(cr), float(cg), float(cb), 1)
@@ -328,78 +357,116 @@ class NetImport(bpy.types.Operator):
                     #make material
                     mat = bpy.data.materials.new(name=i)
                     bpy.data.materials[i].use_nodes=True
-                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeValToRGB")
-                    bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[0].position = 0.5
-                    bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[1].position = 0.5
+                    
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeTexChecker")
+                    
+                    bpy.data.materials[i].node_tree.nodes["Checker Texture"].inputs[3].default_value = (1)                    
+                    
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeMixShader")
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeBsdfPrincipled")
 
-                    #make half transparent
-                    bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[1].color = (1, 1, 1, 0)
-
-                    #set other half to desired colour
-                    bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = (float(cr), float(cg), float(cb), 1)
-                    bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[0].keyframe_insert(data_path="color",frame=cframe)
-                    #link to BSDF
-                    outp=bpy.data.materials[i].node_tree.nodes["ColorRamp"].outputs["Color"]
-                    inp=bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs["Base Color"]
+                    #link to Mix texture
+                    outp=bpy.data.materials[i].node_tree.nodes["Checker Texture"].outputs["Fac"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Mix Shader"].inputs["Fac"]
                     bpy.data.materials[i].node_tree.links.new(inp,outp)
 
-                    outp=bpy.data.materials[i].node_tree.nodes["ColorRamp"].outputs["Alpha"]
-                    inp=bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs["Alpha"]
-                    bpy.data.materials[i].node_tree.links.new(inp,outp)
-
-                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeTexWave")
-                    #set the dash scale
-                    bpy.data.materials[i].node_tree.nodes["Wave Texture"].inputs['Scale'].default_value = cd
-
-                    inp=bpy.data.materials[i].node_tree.nodes["ColorRamp"].inputs["Fac"]
-                    outp=bpy.data.materials[i].node_tree.nodes["Wave Texture"].outputs["Fac"]
-                    bpy.data.materials[i].node_tree.links.new(inp,outp)
-
-                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeTexCoord")
-                    inp=bpy.data.materials[i].node_tree.nodes["Wave Texture"].inputs["Vector"]
-                    outp=bpy.data.materials[i].node_tree.nodes["Texture Coordinate"].outputs["Object"]
+                    outp=bpy.data.materials[i].node_tree.nodes["Principled BSDF"].outputs["BSDF"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Mix Shader"].inputs[1]
                     bpy.data.materials[i].node_tree.links.new(inp,outp)
                     
-                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeOutputMaterial")
-                    outp=bpy.data.materials[i].node_tree.nodes["Principled BSDF"].outputs["BSDF"]
+                    outp=bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].outputs["BSDF"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Mix Shader"].inputs[2]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+                    
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs[0].default_value=(float(cr), float(cg), float(cb), 1)
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[0].default_value=(float(cr), float(cg), float(cb), 1)
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)                    
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)
+                    
+                    if cd>0:
+                        bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=0
+                    else:
+                        bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=1
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].keyframe_insert(data_path="default_value",frame=cframe)
+
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeCombineXYZ")
+                    
+                    outp=bpy.data.materials[i].node_tree.nodes["Combine XYZ"].outputs["Vector"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Checker Texture"].inputs["Vector"]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+                    
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeMath")
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeMath")
+                    
+                    outp=bpy.data.materials[i].node_tree.nodes["Math"].outputs["Value"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Combine XYZ"].inputs["X"]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+                    
+                    bpy.data.materials[i].node_tree.nodes["Math"].operation='MULTIPLY'
+                    
+                    bpy.data.materials[i].node_tree.nodes["Math"].inputs[1].default_value=cd
+                    bpy.data.materials[i].node_tree.nodes["Math"].inputs[1].keyframe_insert(data_path="default_value",frame=cframe)   
+                    
+                    outp=bpy.data.materials[i].node_tree.nodes["Math.001"].outputs["Value"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Combine XYZ"].inputs["Y"]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+                    bpy.data.materials[i].node_tree.nodes["Math.001"].operation='MULTIPLY'
+                    bpy.data.materials[i].node_tree.nodes["Math.001"].inputs[1].default_value=0
+                    
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeSeparateXYZ")
+                    outp=bpy.data.materials[i].node_tree.nodes["Separate XYZ"].outputs["Z"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Combine XYZ"].inputs["Z"]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+                    
+                    outp=bpy.data.materials[i].node_tree.nodes["Separate XYZ"].outputs["X"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Math"].inputs[0]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+
+                    outp=bpy.data.materials[i].node_tree.nodes["Separate XYZ"].outputs["Y"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Math.001"].inputs[0]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+                    
+                    bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeTexCoord")                    
+
+                    outp=bpy.data.materials[i].node_tree.nodes["Texture Coordinate"].outputs["UV"]
+                    inp=bpy.data.materials[i].node_tree.nodes["Separate XYZ"].inputs["Vector"]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)
+                    
+                    outp=bpy.data.materials[i].node_tree.nodes["Mix Shader"].outputs["Shader"]
                     inp=bpy.data.materials[i].node_tree.nodes["Material Output"].inputs["Surface"]
+                    bpy.data.materials[i].node_tree.links.new(inp,outp)                                  
                     return mat
             else:
-                modify_material(name,cr,cg,cb,dashe=0)
+                modify_material(name,cr,cg,cb,cd=cd,forcedash=forcedash)
                 mat = bpy.data.materials[i]
                 return mat
-        def modify_material(name,cr,cg,cb,dashe=0):
+
+        def modify_material(name,cr,cg,cb,cd=0,forcedash=False):
             i=(name+"_mat")
-            dash=dashe>0
+            dash=(cd>0)|forcedash
             if not dash:
                 bpy.data.materials[i].diffuse_color = (float(cr), float(cg), float(cb), 1)
                 bpy.data.materials[i].keyframe_insert(data_path="diffuse_color",frame=cframe)
             else:
-                bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = (float(cr), float(cg), float(cb), 1)
-                bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[0].keyframe_insert(data_path="color",frame=cframe)
-           
-        #Old code when materials were per colour rather than per object
-        # #get materials and column indexes
-
-        # cola=[]
-        # reda=[]
-        # bluea=[]
-        # greena=[]
+                bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs[0].default_value=(float(cr), float(cg), float(cb), 1)
+                bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[0].default_value=(float(cr), float(cg), float(cb), 1)
+                bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)                    
+                bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)
+                if cd>0:
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=0
+                else:
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=1
+                bpy.data.materials[i].node_tree.nodes["Math"].inputs[1].default_value=cd  
+                bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].keyframe_insert(data_path="default_value",frame=cframe)                    
+                bpy.data.materials[i].node_tree.nodes["Math"].inputs[1].keyframe_insert(data_path="default_value",frame=cframe)        
         
-        # cole=[]
-        # rede=[]
-        # bluee=[]
-        # greene=[]
-        # dashe=[]
+        
+        ##functions defined
         
         #names
         vnames=vdatapath.split("_")[0].split("\\")[-1]
-        enames=edatapath.split("_")[0].split("\\")[-1]
-        
-        
-        
-        #Old code which generated a single material per colour. However in order to make colours animateable we now generate one material per object. Wish there was a better way to blend between materials
-        # #get all vertex colours
+        enames=edatapath.split("_")[0].split("\\")[-1]        
+
         with open(vdatapath) as csvfile:
             rdr = csv.reader( csvfile )
             for i, row in enumerate( rdr ):
@@ -445,105 +512,16 @@ class NetImport(bpy.types.Operator):
                     ecolind.append(row.index('green'))
                     ecolind.append(row.index('blue'))  
                     ecolind.append(row.index('curve'))
+                    ecolind.append(row.index('forcecurve'))
                     ecolind.append(row.index('from_shorten'))
                     ecolind.append(row.index('to_shorten'))
                     ecolind.append(row.index('arrowlength'))
                     ecolind.append(row.index('arrowsize'))     
                     ecolind.append(row.index('is3d'))   
                     ecolind.append(row.index('dash'))
+                    ecolind.append(row.index('isdashed'))
                     ecolind.append(row.index('name'))
-                # else:
-                    # efromname,etoname,esz, ecol,from_x, from_y, from_z, to_x, to_y, to_z, ered,egreen,eblue,curve,fromshort,toshort,arrowlength,arrowsize,edge3d,edash = [row[i] for i in ecolind]               
-                    # cola.append(ecol)
-                    # reda.append(ered)
-                    # bluea.append(eblue)
-                    # greena.append(egreen)
-                    
-                    # cole.append(ecol)
-                    # rede.append(ered)
-                    # bluee.append(eblue)
-                    # greene.append(egreen)
-                    # dashe.append(edash)
-                    
-        # #get unique colour names
-        # cola2=set(cola)
-        # #create a mat for each
-        # for i in cola2:
-            # #get first occurence index
-            # colind=cola.index(i)
-            # #get RGB
-            # cr=reda[colind]
-            # cg=greena[colind]
-            # cb=bluea[colind]
 
-            # #make material
-            # if i not in bpy.data.materials:
-                # mat = bpy.data.materials.new(name=i)
-                # mat.diffuse_color = (float(cr), float(cg), float(cb), 1)
-        
-        # #create striped material if any
-        # dashe=[float(i) for i in dashe]
-        # dashbool=[i>0 for i in dashe]
-        # if any(dashbool):
-            # #get dashed names
-            # cole=[str(a) + str(b) for a,b in zip(cole,dashe)]
-            
-            # #filter to dashed only
-            # cole=[i for (i, v) in zip(cole, dashbool) if v]
-            # rede=[i for (i, v) in zip(rede, dashbool) if v]
-            # bluee=[i for (i, v) in zip(bluee, dashbool) if v]
-            # greene=[i for (i, v) in zip(greene, dashbool) if v]
-            # dashe=[i for (i, v) in zip(dashe, dashbool) if v]
-            # cole2=set(cole)
-            
-            # for i in cole2:
-                # #get first occurence index
-                # colind=cole.index(i)
-                # #get RGB
-                # cr=rede[colind]
-                # cg=greene[colind]
-                # cb=bluee[colind]
-                # cd=dashe[colind]
-            
-                # #make material
-                # mat = bpy.data.materials.new(name=i)
-                # bpy.data.materials[i].use_nodes=True
-                # bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeValToRGB")
-                # bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[0].position = 0.5
-                # bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[1].position = 0.5
-
-                # #make half transparent
-                # bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[1].color = (1, 1, 1, 0)
-
-                # #set other half to desired colour
-                # bpy.data.materials[i].node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = (float(cr), float(cg), float(cb), 1)
-                # #link to BSDF
-                # outp=bpy.data.materials[i].node_tree.nodes["ColorRamp"].outputs["Color"]
-                # inp=bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs["Base Color"]
-                # bpy.data.materials[i].node_tree.links.new(inp,outp)
-
-                # outp=bpy.data.materials[i].node_tree.nodes["ColorRamp"].outputs["Alpha"]
-                # inp=bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs["Alpha"]
-                # bpy.data.materials[i].node_tree.links.new(inp,outp)
-
-                # bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeTexWave")
-                # #set the dash scale
-                # bpy.data.materials[i].node_tree.nodes["Wave Texture"].inputs['Scale'].default_value = cd
-
-                # inp=bpy.data.materials[i].node_tree.nodes["ColorRamp"].inputs["Fac"]
-                # outp=bpy.data.materials[i].node_tree.nodes["Wave Texture"].outputs["Fac"]
-                # bpy.data.materials[i].node_tree.links.new(inp,outp)
-
-                # bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeTexCoord")
-                # inp=bpy.data.materials[i].node_tree.nodes["Wave Texture"].inputs["Vector"]
-                # outp=bpy.data.materials[i].node_tree.nodes["Texture Coordinate"].outputs["Object"]
-                # bpy.data.materials[i].node_tree.links.new(inp,outp)
-                
-                # bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeOutputMaterial")
-                # outp=bpy.data.materials[i].node_tree.nodes["Principled BSDF"].outputs["BSDF"]
-                # inp=bpy.data.materials[i].node_tree.nodes["Material Output"].inputs["Surface"]
-
-                # #done
 
         #add nodes
         if (vnames+'nodes') not in bpy.data.collections:
@@ -621,12 +599,13 @@ class NetImport(bpy.types.Operator):
                 #if i == 0: continue # Skip column titles
                 if i == 0: continue
             
-                efromname,etoname,esz, ecol,from_x, from_y, from_z, to_x, to_y, to_z, ered,egreen,eblue,ecurve,fromshort,toshort,arrowlength,arrowsize,edge3d,edash,ename = [row[i] for i in ecolind] 
-
+                efromname,etoname,esz, ecol,from_x, from_y, from_z, to_x, to_y, to_z, ered,egreen,eblue,ecurve,forcecurve,fromshort,toshort,arrowlength,arrowsize,edge3d,edash,forcedash,ename = [row[i] for i in ecolind] 
+                forcecurve=forcecurve=='TRUE'
+                forcedash=forcedash=='TRUE'
                 if ename not in edges.objects:  
                     print("adding "+ename+" "+str(i)) 
                     o = add_bezier([float(from_x),float(from_y),float(from_z)],[float(to_x),float(to_y),float(to_z)],
-                    ename,float(ecurve),toshorten=float(toshort),fromshorten=float(fromshort),arrowlength=float(arrowlength))
+                    ename,float(ecurve),forcecurve,toshorten=float(toshort),fromshorten=float(fromshort),arrowlength=float(arrowlength))
                                 
                     o.name=ename
                     curve = o.data
@@ -634,7 +613,7 @@ class NetImport(bpy.types.Operator):
                     
                     
 
-                    newmat=make_material(ename,ered,egreen,eblue,float(edash))
+                    newmat=make_material(ename,ered,egreen,eblue,float(edash),forcedash=forcedash)
                     curve.materials.append(newmat)
 
                     curve.dimensions = '3D'
@@ -643,15 +622,16 @@ class NetImport(bpy.types.Operator):
                     curve.bevel_resolution = 3
                     if edge3d == 'FALSE':
                         o.scale.z=0.00001
+                        curve.extrude=1
                     o.keyframe_insert(data_path="scale", frame=cframe)
                     edges.objects.link(o)
                     if float(arrowlength)>0:
-                        o=add_arrowhead([float(from_x),float(from_y),float(from_z)],[float(to_x),float(to_y),float(to_z)],ecol,ename+'ah',float(toshort),float(fromshort),arrowsize=float(arrowsize),arrowlength=float(arrowlength),ecurve=float(ecurve),edge3d=edge3d)
+                        o=add_arrowhead([float(from_x),float(from_y),float(from_z)],[float(to_x),float(to_y),float(to_z)],ecol,ename+'ah',float(toshort),float(fromshort),arrowsize=float(arrowsize),arrowlength=float(arrowlength),ecurve=float(ecurve),forcecurve=forcecurve,edge3d=edge3d)
                 else:
                     print("add keyframe "+ename+" "+str(cframe))
                     #get edge
                     o = modify_bezier([float(from_x),float(from_y),float(from_z)],[float(to_x),float(to_y),float(to_z)],
-                    ename,float(ecurve),toshorten=float(toshort),fromshorten=float(fromshort),arrowlength=float(arrowlength))
+                    ename,float(ecurve),forcecurve=forcecurve,toshorten=float(toshort),fromshorten=float(fromshort),arrowlength=float(arrowlength))
                     curve = o.data
                     curve.name=ename
                     curve.dimensions = '3D'
@@ -661,10 +641,66 @@ class NetImport(bpy.types.Operator):
                     if edge3d == 'FALSE':
                         o.scale.z=0.00001
                     o.keyframe_insert(data_path="scale", frame=cframe)
-                    modify_material(ename,ered,egreen,eblue,float(edash))
-                
-                
-                
+                    modify_material(ename,ered,egreen,eblue,float(edash),forcedash)
+                    if float(arrowlength)>0:
+                        modify_material(ename+ah,ered,egreen,eblue)
+                    
+                    
+                    
+
+
+# ------------------------------------------------------------------------
+#    Operators
+# ------------------------------------------------------------------------
+
+class FolderImport(bpy.types.Operator):
+    """Import network to blender"""      # Use this as a tooltip for menu items and buttons.
+    bl_idname = "object.networkfolder"        # Unique identifier for buttons and menu items to reference.
+    bl_label = "Import folder of networks"         # Display name in the interface.
+    bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.  
+
+    def execute(self, context):        # execute() is called when running the operator.
+        print("import multiple networks")
+        scene = context.scene
+        netimp = scene.netimport
+        folderpath=netimp.folderpath
+        frameint=netimp.frameint
+        files=os.listdir(folderpath)
+        fullfiles=[folderpath+"\\"+f for f in files]
+        fullfiles.sort(key=os.path.getmtime)
+        edatafiles = [f for f in fullfiles if "edata" in f]
+        vdatafiles = [f for f in fullfiles if "vdata" in f]
+        for file in range(0,len(edatafiles)):
+            print("importing network "+str(file))
+            edatapath=edatafiles[file]
+            vdatapath=vdatafiles[file]
+            cframe=file*frameint
+            bpy.context.scene.frame_set(cframe)       
+            netimporter1=importnet(context,edatapath,vdatapath,cframe)
+            netimporter1.do_import()
+            
+        print("DONE")
+        return {'FINISHED'}            # Lets Blender know the operator finished successfully.    
+    
+class NetImport(bpy.types.Operator):
+    """Import network to blender"""      # Use this as a tooltip for menu items and buttons.
+    bl_idname = "object.network"        # Unique identifier for buttons and menu items to reference.
+    bl_label = "Import network"         # Display name in the interface.
+    bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.       
+
+
+            
+    def execute(self, context):        # execute() is called when running the operator.
+        print("import single network")
+        scene = context.scene
+        netimp = scene.netimport
+        edatapath=netimp.edatapath
+        vdatapath=netimp.vdatapath
+        cframe=netimp.cframe
+        bpy.context.scene.frame_set(cframe)
+        netimporter1=importnet(context,edatapath,vdatapath,cframe)
+        netimporter1.do_import()
+              
         print("DONE")
         return {'FINISHED'}            # Lets Blender know the operator finished successfully.
 
@@ -679,7 +715,7 @@ class NetImportPanel(Panel):
     bl_label = "Network Import"
     bl_space_type = "VIEW_3D"   
     bl_region_type = "UI"
-    bl_category = "Tool"
+    bl_category = "Import Network"
     bl_context = "objectmode"   
 
 
@@ -695,7 +731,10 @@ class NetImportPanel(Panel):
         layout.prop(netimp, "cframe")
         layout.separator()
         layout.operator( "object.network")
-        
+        layout.separator()
+        layout.prop(netimp, "folderpath")
+        layout.prop(netimp, "frameint")
+        layout.operator( "object.networkfolder")
 
 # ------------------------------------------------------------------------
 #    Registration
@@ -704,6 +743,7 @@ class NetImportPanel(Panel):
 classes = (
     NetProps,
     NetImport,
+    FolderImport,
     NetImportPanel
 )
 

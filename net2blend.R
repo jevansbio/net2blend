@@ -1,6 +1,6 @@
 net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape="sphere",
-	vertex.size=0.2,edge.size=0.1,edge.3d=T,edge.curve=0,vertex.intersect=T,vertex.edgeshorten=0,
-	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,edge.dash=0,directed=F,outputdir=NA,netname="",netname2="",maxlength=NA){
+	vertex.size=0.2,edge.size=0.1,edge.3d=T,edge.curve=0,edge.forcecurve=F,vertex.intersect=T,vertex.edgeshorten=0,
+	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,edge.dash=0,edge.isdashed,zoffset1=0.01,zoffset2=0.05,outputdir=NA,netname="",netname2="",maxlength=NA){
 	#######
 	#Exports files to plot an igraph object in blender. Arguments are similar to igraph.plot
 	#net = Igraph network object
@@ -18,11 +18,13 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	#edge.arrowsize = Thickness of arrows. If edge.arrows is TRUE and no value is provided, is based on edge.size
 	#edge.arrowlength = Length of arrows. If edge.arrows is TRUE and no value is provided, this defaults to 0.2
 	#edge.dash = Size of dashed edges. Larger values result in a greater number of short dashes.
-	#directed is the network directed
 	#outputdir = File path for export
 	#netname = name to append to files
 	#netname2 = second name to append to files - not used by blender
 	#######
+	
+	directed=is.directed(net)
+	
 	if(is.na(outputdir)){
 		outputdir=getwd()
 	}
@@ -46,10 +48,21 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 	V(net)$y=layout$y
 	V(net)$z=layout$z
 
-	if(edge.curve==F){
-		edge.curve=0
-	}else if (edge.curve==T){
-		edge.curve=0.2
+	if(any(edge.curve%in%c(T,F))){
+		edge.curve2=edge.curve
+		edge.curve=rep(0,length(edge.curve))
+		edge.curve[edge.curve2]=0.2
+	}
+	
+	edge.dash2=edge.dash
+	if(any(edge.dash>0)){
+		edata=as_long_data_frame(net)
+		
+		if(length(edge.dash2)<nrow(edata)){
+			edge.dash2=rep(edge.dash2,nrow(edata))
+		}
+		lengths=sqrt((edata$to_x-edata$from_x)^2+(edata$to_y-edata$from_y)^2+(edata$to_z-edata$from_z)^2)
+		edge.dash2[edge.dash>0]=edge.dash2[edge.dash>0]*lengths[edge.dash>0]
 	}
 
 	if(length(edge.curve)==1){
@@ -73,18 +86,20 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape
 
 	E(net)$size=edge.size
 	E(net)$curve=edge.curve
+	E(net)$forcecurve=edge.forcecurve
 	E(net)$is3d=edge.3d
 	E(net)$arrowsize=edge.arrowsize
 	E(net)$arrowlength=edge.arrowlength
-	E(net)$dash=edge.dash
+	E(net)$dash=edge.dash2
+	E(net)$isdashed=edge.isdashed
 	
 	#It is important to permute the nodes to the same order, otherwise the from and to of edges can change, leading to your edges flipping
 	net=permute(net,match(V(net)$name,sort(V(net)$name)))
 
 	edata=as_long_data_frame(net)
 	if(any(!edata$is3d)){
-		highz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-0.01
-		lowz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-0.1
+		highz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-zoffset1
+		lowz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-zoffset2
 	
 		edata$to_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))
 		edata$from_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))

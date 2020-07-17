@@ -40,7 +40,7 @@ g2=add_missing_edges(g2,alledges=alledges,attrlist=list(weight=0))
 
 #For convenience (not required though) can also match the order of nodes
 g1=permute(g1,match(V(g1)$name,sort(V(g1)$name)))
-g2=permute(g1,match(V(g2)$name,sort(V(2)$name)))
+g2=permute(g1,match(V(g2)$name,sort(V(g2)$name)))
 
 #generate edge names for convenience - makes it easier to find the same edges in different graphs
 E(g1)$name=get_edge_names(g1)
@@ -63,6 +63,10 @@ net2blend(g1,layout=l1[match(V(g1)$name,row.names(l1)),],
 vertex.color="red",
 edge.color="black",
 edge.size=0.01*E(g1)$weight,#edges of weight 0 will be invisible
+edge.dash=0,#no dashes
+edge.isdashed=T,#but force the edge to prepare to be dashed
+edge.curve=T,
+edge.forcecurve=T,
 vertex.size=0.05*V(g1)$present,#non present nodes will be invisible
 netname="example1",
 netname2=1)
@@ -81,6 +85,10 @@ net2blend(g2,layout=l2[match(V(g2)$name,row.names(l2)),],
 vertex.color=nodecol,
 edge.color=edgecol,
 edge.size=0.01*E(g2)$weight,#edges of weight 0 will be invisible
+edge.dash=5,#dash size
+edge.isdashed=T,
+edge.curve=F,
+edge.forcecurve=T,
 vertex.size=0.05*V(g2)$present,#non present nodes will be invisible
 netname="example1",
 netname2=2)#note that netname 2 is different
