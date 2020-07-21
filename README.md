@@ -7,13 +7,13 @@ NOTE: Built under Blender 2.8
 
 - Read the R function into R using source. 
 
-- place the import_net.py file in your blender addon folder. Install using the addons menu - it'll be under the name "Import network". This will add an "import network" panel under the "tools" category in the sidebar.
+- place the import_net.py file in your blender addon folder. Install using the addons menu - it'll be under the name "Import network". This will add an "import network"  category in the sidebar.
 
 - Run the R function using an igraph object and other parameters as detailed below - this will export and edge csv and a vertex csv. 
 
 -Then just select these files in the Blender panel and click "import network". Your network objects should appear (depending on the coordinates it might not be in view). 
 
--Alternatively you can point blender to a folder of networks
+-Alternatively you can point blender to a folder of networks with a set interval between them.
 
 ## Changelog:
 
