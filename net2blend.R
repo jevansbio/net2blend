@@ -1,6 +1,6 @@
 net2blend=function(net,layout,vertex.color="red",edge.color="black",vertex.shape="sphere",
 	vertex.size=0.2,edge.size=0.1,edge.3d=T,edge.curve=0,edge.forcecurve=F,vertex.intersect=T,vertex.edgeshorten=0,
-	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,edge.dash=0,edge.isdashed,zoffset1=0.01,zoffset2=0.05,outputdir=NA,netname="",netname2="",maxlength=NA){
+	edge.arrows=F,edge.arrowsize=0,edge.arrowlength=0,edge.dash=0,edge.isdashed=F,zoffset1=0.01,zoffset2=0.05,outputdir=NA,netname="",netname2="",maxlength=NA){
 	#######
 	#Exports files to plot an igraph object in blender. Arguments are similar to igraph.plot
 	#net = Igraph network object
