@@ -257,7 +257,7 @@ class importnet():
             bp1.keyframe_insert(data_path="handle_left_type", frame=cframe)
             
             ob = bpy.data.objects.new(edgename, curve)
-            ob.data.use_uv_as_generated = True
+            #ob.data.use_uv_as_generated = True
 
             ob.matrix_world.translation = o
             ob.keyframe_insert(data_path="scale", frame=cframe)
