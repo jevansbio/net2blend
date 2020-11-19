@@ -17,6 +17,8 @@ NOTE: Built under Blender 2.8
 
 ## Changelog:
 
+19/11/20 - Fixed bug that would prevent import. Thanks to andyrevell for spotting this!
+
 17/07/20 - Added the following features:
 - Changed the position of interface in Blender. Import network now has its own tab instead of being hidden in "tools".
 - Added the ability to import entire folders of networks at set frame intervals.
