@@ -2,7 +2,7 @@ bl_info = {
     "name": "Network to blender",
     "description": "Script to plot networks in Blender",
     "author": "Julian Evans",
-    "version": (0, 0, 6),
+    "version": (0, 0, 7),
     "blender": (2, 80, 0),
     "location": "3D View",
     "warning": "", # used for warning icon and text in addons panel
@@ -19,7 +19,8 @@ import os
 
 from bpy.props import (StringProperty,
                        PointerProperty,
-                       IntProperty
+                       IntProperty,
+                       BoolProperty
                        )
 from bpy.types import (Panel,
                        Operator,
@@ -70,6 +71,18 @@ class NetProps(PropertyGroup):
         maxlen=1024,
         subtype="FILE_PATH",
         )
+        
+    orderbool: BoolProperty(
+        name="",
+        description=":Order by suffix",
+        default=False
+        )
+		
+    framebool: BoolProperty(
+        name="",
+        description=":Frame from suffix",
+        default=False
+        )		
 # ------------------------------------------------------------------------
 #    Functions
 # ------------------------------------------------------------------------
@@ -665,16 +678,27 @@ class FolderImport(bpy.types.Operator):
         netimp = scene.netimport
         folderpath=netimp.folderpath
         frameint=netimp.frameint
+        sortbool=netimp.orderbool
+        framebool=netimp.framebool		
         files=os.listdir(folderpath)
         fullfiles=[folderpath+"\\"+f for f in files]
-        fullfiles.sort(key=os.path.getmtime)
+        if sortbool:
+            filenames=[f.split("_")[-2] for f in files]
+
+            fullfiles=[x for _, x in sorted(zip(filenames, fullfiles))]
+            print(fullfiles)
+        else:
+            fullfiles.sort(key=os.path.getmtime)
         edatafiles = [f for f in fullfiles if "edata" in f]
         vdatafiles = [f for f in fullfiles if "vdata" in f]
         for file in range(0,len(edatafiles)):
             print("importing network "+str(file))
             edatapath=edatafiles[file]
             vdatapath=vdatafiles[file]
-            cframe=file*frameint
+            if framebool:
+                 cframe=int(edatapath.split("_")[-2])
+            else:
+                 cframe=file*frameint
             bpy.context.scene.frame_set(cframe)       
             netimporter1=importnet(context,edatapath,vdatapath,cframe)
             netimporter1.do_import()
@@ -726,19 +750,33 @@ class NetImportPanel(Panel):
         scene = context.scene
         netimp = scene.netimport
         
-        layout.label(text="Edge data path:")
-        layout.prop(netimp, "edatapath")
-        layout.label(text="Vertex data path:")
-        layout.prop(netimp, "vdatapath")
-        layout.prop(netimp, "cframe")
-        layout.separator()
-        layout.operator( "object.network")
-        layout.separator()
-        layout.label(text="Import folder path:")
-        layout.prop(netimp, "folderpath")
-        layout.label(text="Interval between networks:")
-        layout.prop(netimp, "frameint")
-        layout.operator( "object.networkfolder")
+        box1 = layout.box()
+        box1.label(text="Import single network")
+        box1.label(text="Edge data path:")
+        box1.prop(netimp, "edatapath")
+        box1.label(text="Vertex data path:")
+        box1.prop(netimp, "vdatapath")
+        box1.prop(netimp, "cframe")
+        box1.separator()
+        box1.operator( "object.network")
+        box1.separator()
+        
+        box2 = layout.box()
+        box2.label(text="Import folder of networks")
+        box2.label(text="Import folder path:")
+        box2.prop(netimp, "folderpath")
+        
+        box2.label(text="Interval between networks:")
+        box2.prop(netimp, "frameint")
+
+        col1 = box2.column(align=True)
+        row1 = col1.row(align=True)
+        row1.label(text="Order networks by suffix:")
+        row1.prop(netimp, "orderbool")
+        row2 = col1.row(align=True)
+        row2.label(text="Frame number from suffix:")
+        row2.prop(netimp, "framebool")   		
+        box2.operator( "object.networkfolder")
 
 # ------------------------------------------------------------------------
 #    Registration
