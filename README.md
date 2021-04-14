@@ -13,9 +13,13 @@ NOTE: Built under Blender 2.8
 
 -Then just select these files in the Blender panel and click "import network". Your network objects should appear (depending on the coordinates it might not be in view). 
 
--Alternatively you can point blender to a folder of networks with a set interval between them.
+-Alternatively you can point blender to a folder of networks with a set interval between them, or interval defined by the network suffix (netname2 in R).
 
 ## Changelog:
+
+14/04/21 - Added the following features:
+- When importing by folder, you can now sort networks by their suffix (netname2 in R). By default Blender will sort networks by their date created.
+- When importing by folder, you can now import networks at frames based on their suffix (netname2 in R), rather than at set intervals.
 
 19/11/20 - Fixed bug that would prevent import. Thanks to andyrevell for spotting this!
 
@@ -75,7 +79,7 @@ Arguments are similar to igraph.plot:
 - directed = Boolean. Should be true for a directed network. In future this should be obtained from the net argument.
 - outputdir = File path for export. Default is working directory
 - netname = name to append as prefix to files. Format is netname_edata_netname2.csv or netname_vdata_netname2.csv
-- netname2 = name to append as suffix to files. Format is netname_edata_netname2.csv or netname_vdata_netname2.csv. This is primarily for creating multiple versions of the same network for animation.
+- netname2 = name to append as suffix to files. Format is netname_edata_netname2.csv or netname_vdata_netname2.csv. This is primarily for creating multiple versions of the same network for animation. If this is a number, this can be used to set the frame number in Blender.
 
 # findmaxlength
 Returns the maximum length of edge in a particular network/layout combo. This is used to keep curves consistent, as curve amount is based on the maximum edge length.
@@ -108,6 +112,8 @@ Add nodes to the network, if they are not present already, and fill with an attr
 
 ### Blender
 - You can either import networks one at a time or by folder.
+- If importing single networks you will need to point Blender at the nodes and the edges folder and define a frame if you want to create an animation.
+- If importing by folder, you will need to point Blender to the folder. You can then either add the networks at set frame intervals or based on their suffix. 
 - The script creates two collections for convenience - nodes and edges, named based on the filenames If these collections already exist they will not be created again. 
 - Nodes and edges will be created, each with a unique name. If these objects already exist in that collection they will be changed or have a keyframe added.
 - As mentioned above, nodes can either be primitive spheres, cubes, circles or planes. Using a custom object is easy, just set the vertex.shape in R as the name of that object in Blender. If the object doesn't have materials, it'll be given the colour assigned in R, otherwise the existing materials are kept.
