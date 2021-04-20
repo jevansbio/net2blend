@@ -153,7 +153,7 @@ class importnet():
             bpy.context.object.keyframe_insert(data_path="location", frame=cframe)
             bpy.context.object.keyframe_insert(data_path="scale", frame=cframe)
             bpy.context.object.keyframe_insert(data_path="rotation", frame=cframe)
-            edges.objects.link(bpy.context.object)
+            #edges.objects.link(bpy.context.object)
             
         def move_arrowhead(v0, v1, ered,egreen,eblue,edgename='edge',toshorten=0,fromshorten=0,arrowlength=0,arrowsize=0,ecurve=0,forcecurve=False,edge3d=True):
             curved=(ecurve>0)|forcecurve
@@ -542,7 +542,8 @@ class importnet():
             bpy.context.scene.collection.children.link(nodes)
         else:
             nodes=bpy.data.collections[(vnames+'nodes')]
-            
+        bpy.context.view_layer.active_layer_collection = \
+        bpy.context.view_layer.layer_collection.children[(vnames+'nodes')]    
         with open(vdatapath) as csvfile:
             rdr = csv.reader( csvfile )
             for i, row in enumerate( rdr ):
@@ -568,7 +569,7 @@ class importnet():
                         bpy.context.object.data.name=vname
                         bpy.context.object.keyframe_insert(data_path="location", frame=cframe)
                         bpy.context.object.keyframe_insert(data_path="scale", frame=cframe)
-                        nodes.objects.link(bpy.context.object)            
+                        #nodes.objects.link(bpy.context.object)
                     else:
                         if vshape not in bpy.data.objects: 
                             if vshape is not "none":
@@ -586,7 +587,7 @@ class importnet():
                             new_obj.data.materials.append(newmat)
                         new_obj.keyframe_insert(data_path="location", frame=cframe)
                         new_obj.keyframe_insert(data_path="scale", frame=cframe)
-                        nodes.objects.link(new_obj)
+                        #nodes.objects.link(new_obj)
                 else:
                     print("add keyframe "+vname+" "+str(cframe))
                     old_obj=nodes.objects[vname]
@@ -605,7 +606,8 @@ class importnet():
             bpy.context.scene.collection.children.link(edges)
         else:
             edges=bpy.data.collections[(enames+'edges')]
-            
+        bpy.context.view_layer.active_layer_collection = \
+        bpy.context.view_layer.layer_collection.children[(enames+'edges')]                
         with open(edatapath) as csvfile:
             rdr = csv.reader( csvfile )
             for i, row in enumerate( rdr ):
@@ -699,7 +701,8 @@ class FolderImport(bpy.types.Operator):
                  cframe=int(edatapath.split("_")[-2])
             else:
                  cframe=file*frameint
-            bpy.context.scene.frame_set(cframe)       
+            bpy.context.scene.frame_set(cframe) 
+            print(edatapath+" "+vdatapath+" "+str(cframe))
             netimporter1=importnet(context,edatapath,vdatapath,cframe)
             netimporter1.do_import()
             
