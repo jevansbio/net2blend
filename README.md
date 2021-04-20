@@ -17,6 +17,8 @@ NOTE: Built under Blender 2.8
 
 ## Changelog:
 
+20/04/21 - Altered code so that added nodes/edges are no longer linked to the scene master collection as well as the network collection.
+
 14/04/21 - Added the following features:
 - When importing by folder, you can now sort networks by their suffix (netname2 in R). By default Blender will sort networks by their date created.
 - When importing by folder, you can now import networks at frames based on their suffix (netname2 in R), rather than at set intervals.
