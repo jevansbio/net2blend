@@ -26,7 +26,7 @@ if(knitr::opts_knit$get('rmarkdown.pandoc.to')=='gfm'){
   githubdoc=F
 }
 if(githubdoc){
-  filepath="net2blend/net2blendR/vignettes/"
+  filepath="net2blendR/vignettes/"
 }else{
   filepath=""
 }

@@ -79,20 +79,20 @@ you have installed the net2blend add-on correctly you should find the
 “Import network” tab in the side bar (if this is hidden, click the
 circled arrow).
 
-<img src="net2blend/net2blendR/vignettes/blender1.jpg" title="Empty scene" alt="Empty scene" width="100%" />
+<img src="net2blendR/vignettes/blender1.jpg" title="Empty scene" alt="Empty scene" width="100%" />
 
 We’ll use the “import single network” tool to import the network. Set
 the edge and vertex files and click the import network button. The
 network will be imported.
 
-![Import network](blender2.jpg)
+<img src="net2blendR/vignettes/blender2.jpg" title="Import network" alt="Import network" width="100%" />
 
 You’ll see that 2 collections have been added to the scene.
 “examplenetnodes” (yes I’m sorry, I have been inconsistent in my use of
 vertices/nodes) and “examplenetedges”. The vertices and edges are found
 within these collections.
 
-![Network objects](blender3.jpg)
+<img src="net2blendR/vignettes/blender3.jpg" title="Network objects" alt="Network objects" width="100%" />
 
 You now have a network as a 3d object in Blender, ready to render!
 
@@ -147,7 +147,7 @@ net2blend(examplenet1,l2,netname="examplenet",netname2=2,edge.color = "red",vert
 In blender, change the edge and vertex data paths to the new files. Set
 the frame to 30 and click import.
 
-![New keyframe](blender4.jpg)
+<img src="net2blendR/vignettes/blender4.jpg" title="New keyframe" alt="New keyframe" width="100%" />
 
 If the network seems to disappear, it is because your current viewpoint
 isn’t pulled back enough to see the network’s new Z position. The
@@ -155,7 +155,7 @@ current frame on the timeline will be set to 30, where a new keyframe
 has been added for every node and edge. You can slide the timeline back
 and forth and see the network move and change colour.
 
-![Animated network](blendergif1.gif) \#\# Animating networks of changing
-size
+<img src="net2blendR/vignettes/blendergif1.gif" title="Animated network" alt="Animated network" width="100%" />
+\#\# Animating networks of changing size
 
 ### R
