@@ -36,6 +36,14 @@ if(githubdoc){
 
 ### R
 
+The R package can either be installed using the binaries provided on the github repository, or directly using
+
+```{r installpackage,eval=FALSE}
+
+devtools::install_git("jevansbio/net2blend",ref="testing",build_vignettes = T)
+
+```
+
 We can then load the library. We'll also load igraph to build our networks.
 
 ```{r, setup,warning=FALSE,results=FALSE,message=FALSE}
@@ -99,7 +107,7 @@ We'll use the "import single network" tool to import the network. Set the edge a
 
 You'll see that 2 collections have been added to the scene. "examplenetnodes" (yes I'm sorry, I have been inconsistent in my use of vertices/nodes) and "examplenetedges". The vertices and edges are found within these collections. 
 
-`r paste0('<img src="',filepath,'blender3.jpg" title="Network objects" alt="Network objects" width="100%" />')`
+`r paste0('<img src="',filepath,'blender3.jpg" title="Network objects" alt="Network objects" />')`
 
 You now have a network as a 3d object in Blender, ready to render!
 
