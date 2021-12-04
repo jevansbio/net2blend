@@ -17,3 +17,9 @@ Returns a dataframe of all edges that exist within \code{allnets}.
 \description{
 \code{find_all_edges} Find all edges that exist in a list of networks.
 }
+\examples{
+data(examplenet1)
+data(examplenet2)
+netlist=list(examplenet1,examplnet2)
+find_all_edges(netlist)
+}

@@ -2,8 +2,8 @@ bl_info = {
     "name": "Network to blender",
     "description": "Script to plot networks in Blender",
     "author": "Julian Evans",
-    "version": (0, 0, 7),
-    "blender": (2, 80, 0),
+    "version": (1, 0, 0),
+    "blender": (3, 0, 0),
     "location": "3D View",
     "warning": "", # used for warning icon and text in addons panel
     "wiki_url": "",
@@ -107,6 +107,7 @@ class importnet():
         cframe=self.cframe
         
         def add_arrowhead(v0, v1, ered,egreen,eblue,edgename='edge',toshorten=0,fromshorten=0,arrowlength=0,arrowsize=0,ecurve=0,forcecurve=False,edge3d=True):
+            edgename=str(edgename)
             curved=(ecurve>0)|forcecurve
             v0, v1 = Vector(v0), Vector(v1)  
             #backup original coords
@@ -137,25 +138,26 @@ class importnet():
             #avec.normalized()
             
             bpy.ops.mesh.primitive_cone_add(radius2=0,end_fill_type='TRIFAN')
-            bpy.ops.object.scale.x=arrowsize
-            bpy.ops.object.scale.y=arrowsize
-            bpy.ops.object.scale.z=arrowlength
+            bpy.context.object.scale.x=arrowsize
+            bpy.context.object.scale.y=arrowsize
+            bpy.context.object.scale.z=arrowlength
             bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
             bpy.context.object.location=v1
             if edge3d == 'FALSE':
                 bpy.context.object.scale.x=0.00001
             bpy.context.object.rotation_mode = 'QUATERNION'
             bpy.context.object.rotation_quaternion = avec.to_track_quat('Z', 'X')
-            newmat=make_material(edgename,ered,egreen,eblue)
+            newmat=make_material(edgename+'_ah',ered,egreen,eblue)
             bpy.context.object.data.materials.append(newmat)
-            bpy.context.object.name=edgename+'ah'
-            bpy.context.object.data.name=edgename+'ah'
+            bpy.context.object.name=edgename+'_ah'
+            bpy.context.object.data.name=edgename+'_ah'
             bpy.context.object.keyframe_insert(data_path="location", frame=cframe)
             bpy.context.object.keyframe_insert(data_path="scale", frame=cframe)
-            bpy.context.object.keyframe_insert(data_path="rotation", frame=cframe)
+            bpy.context.object.keyframe_insert(data_path="rotation_quaternion", frame=cframe)
             #edges.objects.link(bpy.context.object)
             
         def move_arrowhead(v0, v1, ered,egreen,eblue,edgename='edge',toshorten=0,fromshorten=0,arrowlength=0,arrowsize=0,ecurve=0,forcecurve=False,edge3d=True):
+            edgename=str(edgename)
             curved=(ecurve>0)|forcecurve
             v0, v1 = Vector(v0), Vector(v1)  
             #backup original coords
@@ -184,7 +186,7 @@ class importnet():
                 v2=v1
             avec=v01-v2
             
-            old_obj=edges.objects[edgename+'ah']
+            old_obj=edges.objects[edgename+'_ah']
             old_obj.location=v1
             old_obj.scale.x=arrowsize
             old_obj.scale.y=arrowsize
@@ -195,7 +197,7 @@ class importnet():
             modify_material(edgename,ered,egreen,eblue)
             old_obj.keyframe_insert(data_path="location", frame=cframe)
             old_obj.keyframe_insert(data_path="scale", frame=cframe)
-            old_obj.keyframe_insert(data_path="rotation", frame=cframe)
+            old_obj.keyframe_insert(data_path="rotation_quaternion", frame=cframe)
             
         def add_bezier(v0 , v1,edgename='edge',ecurve=0,forcecurve=False,toshorten=0,fromshorten=0,arrowlength=0):
             curved=(ecurve>0)|forcecurve
@@ -370,6 +372,8 @@ class importnet():
                     #make material
                     mat = bpy.data.materials.new(name=i)
                     bpy.data.materials[i].use_nodes=True
+                    bpy.data.materials[i].blend_method='HASHED'
+                    bpy.data.materials[i].shadow_method='HASHED'
                     
                     bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeTexChecker")
                     
@@ -396,11 +400,11 @@ class importnet():
                     bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)                    
                     bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)
                     
-                    if cd>0:
-                        bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=0
+                    if forcedash:
+                        bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[21].default_value=0
                     else:
-                        bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=1
-                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].keyframe_insert(data_path="default_value",frame=cframe)
+                        bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[21].default_value=1
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[21].keyframe_insert(data_path="default_value",frame=cframe)
 
                     bpy.data.materials[i].node_tree.nodes.new(type="ShaderNodeCombineXYZ")
                     
@@ -465,12 +469,12 @@ class importnet():
                 bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[0].default_value=(float(cr), float(cg), float(cb), 1)
                 bpy.data.materials[i].node_tree.nodes["Principled BSDF"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)                    
                 bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[0].keyframe_insert(data_path="default_value",frame=cframe)
-                if cd>0:
-                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=0
+                if forcedash:
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[21].default_value=0
                 else:
-                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].default_value=1
+                    bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[21].default_value=1
                 bpy.data.materials[i].node_tree.nodes["Math"].inputs[1].default_value=cd  
-                bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[18].keyframe_insert(data_path="default_value",frame=cframe)                    
+                bpy.data.materials[i].node_tree.nodes["Principled BSDF.001"].inputs[21].keyframe_insert(data_path="default_value",frame=cframe)                    
                 bpy.data.materials[i].node_tree.nodes["Math"].inputs[1].keyframe_insert(data_path="default_value",frame=cframe)        
         
         
@@ -587,7 +591,7 @@ class importnet():
                             new_obj.data.materials.append(newmat)
                         new_obj.keyframe_insert(data_path="location", frame=cframe)
                         new_obj.keyframe_insert(data_path="scale", frame=cframe)
-                        #nodes.objects.link(new_obj)
+                        nodes.objects.link(new_obj)
                 else:
                     print("add keyframe "+vname+" "+str(cframe))
                     old_obj=nodes.objects[vname]
@@ -641,7 +645,7 @@ class importnet():
                     o.keyframe_insert(data_path="scale", frame=cframe)
                     edges.objects.link(o)
                     if float(arrowlength)>0:
-                        o=add_arrowhead([float(from_x),float(from_y),float(from_z)],[float(to_x),float(to_y),float(to_z)],ecol,ename+'ah',float(toshort),float(fromshort),arrowsize=float(arrowsize),arrowlength=float(arrowlength),ecurve=float(ecurve),forcecurve=forcecurve,edge3d=edge3d)
+                        o=add_arrowhead([float(from_x),float(from_y),float(from_z)],[float(to_x),float(to_y),float(to_z)],ered,egreen,eblue,ename,float(toshort),float(fromshort),arrowsize=float(arrowsize),arrowlength=float(arrowlength),ecurve=float(ecurve),forcecurve=forcecurve,edge3d=edge3d)
                 else:
                     print("add keyframe "+ename+" "+str(cframe))
                     #get edge
@@ -658,7 +662,7 @@ class importnet():
                     o.keyframe_insert(data_path="scale", frame=cframe)
                     modify_material(ename,ered,egreen,eblue,float(edash),forcedash)
                     if float(arrowlength)>0:
-                        modify_material(ename+ah,ered,egreen,eblue)
+                        move_arrowhead([float(from_x),float(from_y),float(from_z)],[float(to_x),float(to_y),float(to_z)],ered,egreen,eblue,ename,float(toshort),float(fromshort),arrowsize=float(arrowsize),arrowlength=float(arrowlength),ecurve=float(ecurve),forcecurve=forcecurve,edge3d=edge3d)
                     
                     
                     

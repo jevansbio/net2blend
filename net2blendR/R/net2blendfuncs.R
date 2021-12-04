@@ -50,8 +50,8 @@
 #'     of edges in the network. Default is FALSE.
 #' @param edge.arrowsize Thickness of arrowheads. Can be a single value or a vector of
 #'      the same length as the number of edges in the network.
-#'      If \code{edge.arrows} is TRUE and no value is provided, this is based
-#'      on \code{edge.size}. Defaults to 0.
+#'      If \code{edge.arrows} is TRUE and no value is provided, defaults to
+#'       \code{edge.size + 0.05}.
 #' @param edge.arrowlength Length of arrowheads. Can be a single value or a vector of
 #'      the same length as the number of edges in the network.
 #'      If \code{edge.arrows} is TRUE and no value is provided, this defaults
@@ -76,6 +76,10 @@
 #'     for full R to Blender workflow and examples.
 #'
 #' @examples
+#' data(examplenet1)
+#' l1=layout_nicely(examplenet1)
+#' l1=l1*10
+#' net2blend(examplenet1,l1,netname="examplenet")
 #' @export
 net2blend=function(net,layout,vertex.color="red",edge.color="black",
                    vertex.shape="sphere",	vertex.size=0.2,edge.size=0.1,
@@ -96,8 +100,12 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
 		edge.arrowlength=0.2
 	}
 
-	if((!vertex.intersect&vertex.edgeshorten==0)|edge.arrows){
+	if((!vertex.intersect&vertex.edgeshorten==0)){
 		vertex.edgeshorten=vertex.size-0.05
+	}
+
+	if(edge.arrows){
+	  vertex.edgeshorten=vertex.edgeshorten+edge.arrowlength
 	}
 
 	colnames(layout)=c("x","y","z")[1:ncol(layout)]
@@ -116,7 +124,7 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
 	}
 
 	edge.dash2=edge.dash
-	if(any(edge.dash>0)){
+	if(any(edge.dash>0)|edge.isdashed){
 		edata=igraph::as_long_data_frame(net)
 
 		if(length(edge.dash2)<nrow(edata)){
@@ -198,6 +206,10 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
 #'     curved edges consistent over multiple networks.
 #'
 #' @examples
+#' data(examplenet1)
+#' l1=layout_nicely(examplenet1)
+#' l1=l1*10
+#' findmaxlength(examplenet1,l1)
 #' @export
 findmaxlength=function(net,layout){
 
@@ -224,6 +236,10 @@ findmaxlength=function(net,layout){
 #'     that all edges are correctly generated for animation in Blender.
 #'
 #' @examples
+#' data(examplenet1)
+#' data(examplenet2)
+#' netlist=list(examplenet1,examplnet2)
+#' find_all_edges(netlist)
 #' @export
 find_all_edges=function(allnets){
   directed=any(sapply(allnets,igraph::is.directed))
@@ -256,6 +272,14 @@ find_all_edges=function(allnets){
 #'     provided by \code{attrlist}.
 #'
 #' @examples
+#' data(examplenet1)
+#' data(examplenet2)
+#' netlist=list(examplenet1,examplnet2)#list of nets
+#' alledges=find_all_edges(netlist)#get all edges
+#' allvertices=find_all_vertex(netlist)#get all vertices
+#' #add missing vertices and edges to a network
+#' examplenet1=add_missing_vertex(examplenet1,allvertices)
+#' examplenet1=add_missing_edgeS(examplenet1,alledges)
 #' @export
 add_missing_edges=function(net,alledges=NULL,attrlist=list()){
   directed=igraph::is.directed(net)
@@ -288,16 +312,20 @@ add_missing_edges=function(net,alledges=NULL,attrlist=list()){
 	return(net2)
 }
 
-#' Find all possible edges in a list of networks
+#' Find all possible vertices in a list of networks
 #'
 #' \code{find_all_vertex} Find all edges that exist in a list of networks.
 #'
 #' @param allnets list of igraph network objects
 #' @return Returns a vector of all vertices that exist within \code{allnets}.
 #'     This can be used as an argument in \code{add_missing_vertex} to ensure
-#'     that all edges are correctly generated for animation in Blender.
+#'     that all vertices are correctly generated for animation in Blender.
 #'
 #' @examples
+#' data(examplenet1)
+#' data(examplenet2)
+#' netlist=list(examplenet1,examplnet2)#list of nets
+#' allvertices=find_all_vertex(netlist)#get all vertices
 #' @export
 find_all_vertex=function(allnets){
 	unique(unlist(sapply(allnets,function(x){
@@ -318,6 +346,13 @@ find_all_vertex=function(allnets){
 #'     provided by \code{attrlist}.
 #'
 #' @examples
+#' data(examplenet1)
+#' data(examplenet2)
+#' netlist=list(examplenet1,examplnet2)#list of nets
+#' alledges=find_all_edges(netlist)#get all edges
+#' allvertices=find_all_vertex(netlist)#get all vertices
+#' #add missing vertices to examplenet1
+#' examplenet1=add_missing_vertex(examplenet1,allvertices)
 #' @export
 add_missing_vertex=function(net,allvertex,attrlist=list()){
 	if(!"name"%in%attrlist){
@@ -337,6 +372,8 @@ add_missing_vertex=function(net,allvertex,attrlist=list()){
 #' @param net igraph network object
 #' @return Returns a vector of edge names in the format "vertex1_vertex2"
 #' @examples
+#' data(examplenet1)
+#' get_edge_names(examplenet1)
 #' @export
 get_edge_names=function(net){
   directed=igraph::is.directed(net)

@@ -22,3 +22,12 @@ Returns a network with the vertices of \code{allvertex} that are not
 \description{
 \code{add_missing_vertices} Add edges to a network to ensure consistency.
 }
+\examples{
+data(examplenet1)
+data(examplenet2)
+netlist=list(examplenet1,examplnet2)#list of nets
+alledges=find_all_edges(netlist)#get all edges
+allvertices=find_all_vertex(netlist)#get all vertices
+#add missing vertices to examplenet1
+examplenet1=add_missing_vertex(examplenet1,allvertices)
+}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/net2blendfuncs.R
 \name{find_all_vertex}
 \alias{find_all_vertex}
-\title{Find all possible edges in a list of networks}
+\title{Find all possible vertices in a list of networks}
 \usage{
 find_all_vertex(allnets)
 }
@@ -12,8 +12,14 @@ find_all_vertex(allnets)
 \value{
 Returns a vector of all vertices that exist within \code{allnets}.
     This can be used as an argument in \code{add_missing_vertex} to ensure
-    that all edges are correctly generated for animation in Blender.
+    that all vertices are correctly generated for animation in Blender.
 }
 \description{
 \code{find_all_vertex} Find all edges that exist in a list of networks.
+}
+\examples{
+data(examplenet1)
+data(examplenet2)
+netlist=list(examplenet1,examplnet2)#list of nets
+allvertices=find_all_vertex(netlist)#get all vertices
 }

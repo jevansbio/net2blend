@@ -22,3 +22,9 @@ Returns the length of the longest edge in a given layout. This can
 \description{
 \code{findmaxlength} Calculate longest edge in a given layout
 }
+\examples{
+data(examplenet1)
+l1=layout_nicely(examplenet1)
+l1=l1*10
+findmaxlength(examplenet1,l1)
+}

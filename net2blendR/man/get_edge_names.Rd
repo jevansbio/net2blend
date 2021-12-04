@@ -15,3 +15,7 @@ Returns a vector of edge names in the format "vertex1_vertex2"
 \description{
 \code{get_edge_names} Utility function to assign each edge a name.
 }
+\examples{
+data(examplenet1)
+get_edge_names(examplenet1)
+}

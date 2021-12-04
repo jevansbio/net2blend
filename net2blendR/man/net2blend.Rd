@@ -93,8 +93,8 @@ of edges in the network. Default is FALSE.}
 
 \item{edge.arrowsize}{Thickness of arrowheads. Can be a single value or a vector of
 the same length as the number of edges in the network.
-If \code{edge.arrows} is TRUE and no value is provided, this is based
-on \code{edge.size}. Defaults to 0.}
+If \code{edge.arrows} is TRUE and no value is provided, defaults to
+ \code{edge.size + 0.05}.}
 
 \item{edge.arrowlength}{Length of arrowheads. Can be a single value or a vector of
 the same length as the number of edges in the network.
@@ -130,4 +130,10 @@ Exports two files, one for edges (edata) and one for vertices (vdata).
 }
 \description{
 \code{net2blend} Exports networks in a format for importing into blender
+}
+\examples{
+data(examplenet1)
+l1=layout_nicely(examplenet1)
+l1=l1*10
+net2blend(examplenet1,l1,netname="examplenet")
 }
