@@ -308,7 +308,7 @@ Open a new scene and import both networks at different frames:
 
 As you can see, edges and nodes now appear and disappear.
 
-## Animating curved and dashed edges, importing folders.
+# Animating curved and dashed edges, importing folders.
 
 As with edges and vertices disappearing and appearing, a little bit of forethought is needed to animate curved and dashed edges. If you want to have an edge curve or become dashed at any point, you need to consider this in the initial setup.
 
@@ -379,7 +379,7 @@ As you can see, the dashes fade in but then scale out.
 
 `r paste0('<img src="',filepath,'blendergif3.gif" title="animated network 3" alt="animated network 3" width="100%" />')`
 
-## Using custom vertex objects.
+# Using custom vertex objects.
 
 While net2blend can create spheres, cubes, circles and squares, we can also use any Blender object as a vertex shape allowing some interesting effects as can be seen in some of the examples above. Doing this is fairly straightforward.
 
@@ -439,7 +439,7 @@ netname="CustomShapes",
 netname2="")
 ```
 
-## Arrows
+# Arrows
 
 ### R
 
@@ -464,7 +464,7 @@ netname2="")
 
 `r paste0('<img src="',filepath,'blender8.jpg" title="Arrowheads" alt="Arrowheads" width="100%" />')`
 
-## 2d networks in 3d Space
+# 2d networks in 3d Space
 
 ### R
 
