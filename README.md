@@ -9,17 +9,21 @@ Julian Evans
     -   [Simple example](#simple-example)
     -   [Animating networks of changing
         size](#animating-networks-of-changing-size)
-    -   [Animating curved and dashed edges, importing
-        folders.](#animating-curved-and-dashed-edges-importing-folders.)
-    -   [Using custom vertex objects.](#using-custom-vertex-objects.)
-    -   [Arrows](#arrows)
-    -   [2d networks in 3d Space](#d-networks-in-3d-space)
+-   [Animating curved and dashed edges, importing
+    folders.](#animating-curved-and-dashed-edges-importing-folders.)
+-   [Using custom vertex objects.](#using-custom-vertex-objects.)
+-   [Arrows](#arrows)
+-   [2d networks in 3d Space](#d-networks-in-3d-space)
 
 <img src="net2blendR/vignettes/examples.jpg" title="" alt="Examples" width="100%" />
 
 Net2Blend is a way of exporting igraph network objects from R and
 importing them into blender, allowing the creation of interesting
 visualisations of networks and animations of networks.
+
+<img src="net2blendR/vignettes/examplevid1.gif" title="" alt="Example vid1" width="100%" />
+
+<img src="net2blendR/vignettes/examplevid2.gif" title="" alt="Example vid2" width="100%" />
 
 # Initial set up
 
@@ -335,7 +339,7 @@ Open a new scene and import both networks at different frames:
 
 As you can see, edges and nodes now appear and disappear.
 
-## Animating curved and dashed edges, importing folders.
+# Animating curved and dashed edges, importing folders.
 
 As with edges and vertices disappearing and appearing, a little bit of
 forethought is needed to animate curved and dashed edges. If you want to
@@ -426,7 +430,7 @@ As you can see, the dashes fade in but then scale out.
 
 <img src="net2blendR/vignettes/blendergif3.gif" title="animated network 3" alt="animated network 3" width="100%" />
 
-## Using custom vertex objects.
+# Using custom vertex objects.
 
 While net2blend can create spheres, cubes, circles and squares, we can
 also use any Blender object as a vertex shape allowing some interesting
@@ -502,7 +506,7 @@ netname="CustomShapes",
 netname2="")
 ```
 
-## Arrows
+# Arrows
 
 ### R
 
@@ -528,7 +532,7 @@ netname2="")
 
 <img src="net2blendR/vignettes/blender8.jpg" title="Arrowheads" alt="Arrowheads" width="100%" />
 
-## 2d networks in 3d Space
+# 2d networks in 3d Space
 
 ### R
 
@@ -564,4 +568,4 @@ netname2="")
 Here is the above 2d network, with some tweaks to lighting and render
 settings.
 
-<img src="net2blendR/vignettes/blender9.jpg" title="2d network" alt="2d network" width="100%" />
+<img src="net2blendR/vignettes/blender10.jpg" title="2d network" alt="2d network" width="100%" />
