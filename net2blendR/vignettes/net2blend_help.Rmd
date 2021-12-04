@@ -494,6 +494,6 @@ netname2="")
 
 Here is the above 2d network, with some tweaks to lighting and render settings.
 
-`r paste0('<img src="',filepath,'Blender9.jpg" title="2d network" alt="2d network" width="100%" />')`
+`r paste0('<img src="',filepath,'blender10.jpg" title="2d network" alt="2d network" width="100%" />')`
 
 
