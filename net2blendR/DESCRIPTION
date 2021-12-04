@@ -1,0 +1,20 @@
+Package: net2blendR
+Type: Package
+Title: Export networks from R to Blender
+Version: 0.1.0
+Author: Julian Evans
+Maintainer: Julian Evans <jevansbio@gmail.com>
+Description: Functions to export an igraph nework object to a format
+    that the net2blend Blender add-on can import
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    igraph
+RoxygenNote: 7.1.2
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

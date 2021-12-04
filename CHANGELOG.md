@@ -1,14 +1,23 @@
-## Changelog:
+# 04/12/21 
+## Tested with Blender 3.0, made the R functions an R package, improved documentation and many bugfixes.
+- Fixed dashes again, but they also now work in eevee! Previously the code was altering the "transmission roughness" instead of alpha. Oops.
+- edge.isdashed controls the transparency of dashes while edge.dash controls the size. This was meant to be true last time, but definitely is now
+- Fixed arrowheads
+- Fixed custom vertex shapes, which I broke when tweaking how vertices are linked to collections.
 
-20/04/21 - Altered code so that added nodes/edges are no longer linked to the scene master collection as well as the network collection.
+# 20/04/21 
+- Altered code so that added nodes/edges are no longer linked to the scene master collection as well as the network collection.
 
-14/04/21 - Added the following features:
+# 14/04/21 
+## Added the following features:
 - When importing by folder, you can now sort networks by their suffix (netname2 in R). By default Blender will sort networks by their date created.
 - When importing by folder, you can now import networks at frames based on their suffix (netname2 in R), rather than at set intervals.
 
-19/11/20 - Fixed bug that would prevent import. Thanks to andyrevell for spotting this!
+# 19/11/20
+- Fixed bug that would prevent import. Thanks to andyrevell for spotting this!
 
-17/07/20 - Added the following features:
+#17/07/20
+## Added the following features:
 - Changed the position of interface in Blender. Import network now has its own tab instead of being hidden in "tools".
 - Added the ability to import entire folders of networks at set frame intervals.
 - Added ability to animate line dashes. Still only visible in cycles renderer unfortunatley.
@@ -17,7 +26,8 @@
 - Exposed arguments for how much to offset 2d edges.
 - Quite a few bugfixes.
 
-26/06/20 - Added the following features:
+# 26/06/20 
+## Added the following features:
 
 - Networks can now be animated! Simply set the frame option to wherever you want the keyframe to be added. If the objects exist already they will be modified with the new values. Size, position and colour of edges can have keyframes associated with them in blender. This has neccesitated the changing of a few things:
 - Size of nodes is now in relation to the initial size of blender primities (2m) rather than absolute units. This is to ensure consistency when modifying a nodes size.
@@ -26,7 +36,8 @@
 - There is now a "directed" argument due to the new way in which the script will attempt to create consistent edge names. In the future I'll modify this to check the igraph object instead. I have not tested animations thorougly with arrows and directed networks yet.
 - Added a few utility functions to aid in the setting up of networks for animations, namely to fill a network with the empty edges that might not exist in a particular version of that network, but still need a keyframe.
 
-26/08/19 - Added the following features:
+# 26/08/19 
+## Added the following features:
 
 - Edges can now be dashed lines. Giving the edge.dash argument a value will make that edge dashed. Note that at the moment edges will only be dashed in the Cycles renderer.
 - Edge and node collections now named based on the filename for easier organisation.
