@@ -35,7 +35,9 @@ if(githubdoc){
 
 Net2Blend is a way of exporting igraph network objects from R and importing them into blender, allowing the creation of interesting visualisations of networks and animations of networks.
 
+`r paste0('<img src="',filepath,'examplevid1.gif" title="" alt="Example vid1" width="100%" />')`
 
+`r paste0('<img src="',filepath,'examplevid2.gif" title="" alt="Example vid2" width="100%" />')`
 
 # Initial set up
 
@@ -492,4 +494,6 @@ netname2="")
 
 Here is the above 2d network, with some tweaks to lighting and render settings.
 
-`r paste0('<img src="',filepath,'blender9.jpg" title="2d network" alt="2d network" width="100%" />')`
+`r paste0('<img src="',filepath,'Blender9.jpg" title="2d network" alt="2d network" width="100%" />')`
+
+
