@@ -20,10 +20,14 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 options(rmarkdown.html_vignette.check_title = FALSE)
-if(knitr::opts_knit$get('rmarkdown.pandoc.to')=='gfm'){
-  githubdoc=T  
-}else{
+if(is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))){
   githubdoc=F
+}else{
+  if(knitr::opts_knit$get('rmarkdown.pandoc.to')=='gfm'){
+    githubdoc=T  
+  }else{
+    githubdoc=F
+  }
 }
 if(githubdoc){
   filepath="net2blendR/vignettes/"
@@ -51,7 +55,7 @@ The R package can either be installed using the binaries provided on the github 
 
 ```{r installpackage,eval=FALSE}
 
-devtools::install_github("jevansbio/net2blend",subdir="net2blendR",ref="main",build_vignettes = T)
+devtools::install_github("jevansbio/net2blend",subdir="net2blendR")
 
 ```
 
