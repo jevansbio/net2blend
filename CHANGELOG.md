@@ -1,3 +1,6 @@
+# 07/12/21
+## Fixed a small bug in R package vignette compilation.
+
 # 04/12/21 
 ## Tested with Blender 3.0, made the R functions an R package, improved documentation and many bugfixes.
 - Fixed dashes again, but they also now work in eevee! Previously the code was altering the "transmission roughness" instead of alpha. Oops.
