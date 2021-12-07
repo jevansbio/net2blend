@@ -40,7 +40,7 @@ The R package can either be installed using the binaries provided on the
 github repository, or directly using
 
 ``` r
-devtools::install_github("jevansbio/net2blend",subdir="net2blendR",build_vignettes = T)
+devtools::install_github("jevansbio/net2blend",subdir="net2blendR")
 ```
 
 We can then load the library. We’ll also load igraph to build our
