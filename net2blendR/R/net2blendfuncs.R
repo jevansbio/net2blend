@@ -137,7 +137,7 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
 	if(length(edge.curve)==1){
 		#if only one curve value is supplied, scale by edge length
 		edata=igraph::as_long_data_frame(net)
-		if(nrow(edta>0)){
+		if(nrow(edata>0)){
 		  lengths=sqrt((edata$to_x-edata$from_x)^2+(edata$to_y-edata$from_y)^2+(edata$to_z-edata$from_z)^2)
 		  if(is.na(maxlength)){
 			  maxlength=max(lengths)
