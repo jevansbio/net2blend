@@ -460,6 +460,8 @@ class importnet():
 
         def modify_material(name,cr,cg,cb,cd=0,forcedash=False):
             i=(name+"_mat")
+            if i not in bpy.data.materials:
+                return
             dash=(cd>0)|forcedash
             if not dash:
                 bpy.data.materials[i].diffuse_color = (float(cr), float(cg), float(cb), 1)
@@ -586,7 +588,7 @@ class importnet():
                         new_obj.data.name=vname
                         new_obj.location=( float(vx), float(vy), float(vz) )
                         new_obj.scale=(float(vsz),float(vsz),float(vsz))
-                        if not new_obj.data.materials:
+                        if 'materials' in dir(new_obj.data) and not new_obj.data.materials:
                             newmat=make_material(vname,vred,vgreen,vblue)
                             new_obj.data.materials.append(newmat)
                         new_obj.keyframe_insert(data_path="location", frame=cframe)
@@ -599,7 +601,8 @@ class importnet():
                     old_obj.scale=(float(vsz),float(vsz),float(vsz))
                     old_obj.keyframe_insert(data_path="location", frame=cframe)
                     old_obj.keyframe_insert(data_path="scale", frame=cframe)
-                    modify_material(vname,vred,vgreen,vblue)
+                    if 'materials' in dir(old_obj.data):
+                        modify_material(vname,vred,vgreen,vblue)
                 
         
         print("add edges")
