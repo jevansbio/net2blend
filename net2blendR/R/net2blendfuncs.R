@@ -166,27 +166,29 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
 	net=permute(net,match(igraph::V(net)$name,sort(igraph::V(net)$name)))
 
 	edata=igraph::as_long_data_frame(net)
-	if(any(!edata$is3d)){
-		highz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-zoffset1
-		lowz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-zoffset2
+	if(nrow(edata>0)){
+  	if(any(!edata$is3d)){
+  		highz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-zoffset1
+  		lowz=max(c(edata$to_z[!edata$is3d],edata$from_z[!edata$is3d]))-zoffset2
 
-		edata$to_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))
-		edata$from_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))
-	}
+  		edata$to_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))
+  		edata$from_z[!edata$is3d]=seq(lowz,highz,length.out=sum(!edata$is3d))
+  	}
+
+  	edata=data.frame(edata,t(grDevices::col2rgb(edata$colour)/255))
+
+  	edata$name=sapply(1:nrow(edata),function(x){
+  		cnodes=c(edata$from_name[x],edata$to_name[x])
+  		if(!directed){
+  			cnodes=cnodes[order(cnodes)]
+  		}
+  		paste(cnodes,collapse="_")
+  	})
+  	write.csv(edata,file.path(outputdir,paste(netname,"edata",netname2,".csv",sep="_")),row.names=F)
+  }
+
 	vdata=igraph::as_data_frame(net,what = 'vertices')
-	edata=data.frame(edata,t(grDevices::col2rgb(edata$colour)/255))
-
-	edata$name=sapply(1:nrow(edata),function(x){
-		cnodes=c(edata$from_name[x],edata$to_name[x])
-		if(!directed){
-			cnodes=cnodes[order(cnodes)]
-		}
-		paste(cnodes,collapse="_")
-	})
-
 	vdata=data.frame(vdata,t(grDevices::col2rgb(vdata$colour)/255))
-
-	write.csv(edata,file.path(outputdir,paste(netname,"edata",netname2,".csv",sep="_")),row.names=F)
 	write.csv(vdata,file.path(outputdir,paste(netname,"vdata",netname2,".csv",sep="_")),row.names=F)
 
 }
