@@ -137,11 +137,13 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
 	if(length(edge.curve)==1){
 		#if only one curve value is supplied, scale by edge length
 		edata=igraph::as_long_data_frame(net)
-		lengths=sqrt((edata$to_x-edata$from_x)^2+(edata$to_y-edata$from_y)^2+(edata$to_z-edata$from_z)^2)
-		if(is.na(maxlength)){
-			maxlength=max(lengths)
+		if(nrow(edta>0)){
+		  lengths=sqrt((edata$to_x-edata$from_x)^2+(edata$to_y-edata$from_y)^2+(edata$to_z-edata$from_z)^2)
+		  if(is.na(maxlength)){
+			  maxlength=max(lengths)
+		  }
+		  edge.curve=edge.curve*(lengths/maxlength)
 		}
-		edge.curve=edge.curve*(lengths/maxlength)
 	}
 
 	igraph::V(net)$colour=vertex.color
@@ -184,8 +186,8 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
   		}
   		paste(cnodes,collapse="_")
   	})
-  	write.csv(edata,file.path(outputdir,paste(netname,"edata",netname2,".csv",sep="_")),row.names=F)
   }
+	write.csv(edata,file.path(outputdir,paste(netname,"edata",netname2,".csv",sep="_")),row.names=F)
 
 	vdata=igraph::as_data_frame(net,what = 'vertices')
 	vdata=data.frame(vdata,t(grDevices::col2rgb(vdata$colour)/255))
