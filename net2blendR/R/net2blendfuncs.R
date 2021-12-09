@@ -186,6 +186,11 @@ net2blend=function(net,layout,vertex.color="red",edge.color="black",
   		}
   		paste(cnodes,collapse="_")
   	})
+	}else{
+    edata$red=c()
+    edata$green=c()
+    edata$blue=c()
+    edata$name=c()
   }
 	write.csv(edata,file.path(outputdir,paste(netname,"edata",netname2,".csv",sep="_")),row.names=F)
 
