@@ -1,3 +1,6 @@
+# 09/12/21
+## Tweaked R code to allow networks with no edges to be exported/imported. Altered Blender add-on to be able to animate custom node objects with pre-defined materials.
+
 # 07/12/21
 ## Fixed a small bug in R package vignette compilation.
 
