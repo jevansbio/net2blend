@@ -413,7 +413,7 @@ dashes fading in. When we move to network 3, “isdashed” is still true,
 but dash size is set to 0. This results in the dashes increasing in size
 until the line becomes solid.
 
-\#\#\#Blender
+### Blender
 
 This time we’ll use the import folder of network function so we don’t
 have to import each network individually. Browse to the folder where the
